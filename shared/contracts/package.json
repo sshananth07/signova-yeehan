@@ -1,0 +1,20 @@
+{
+  "name": "@signova/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Shared zod schemas: TS types for the frontend and NestJS, JSON Schema for Flask (plan 00 Task A.1).",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "schema": "npm run build && node scripts/json-schema.ts",
+    "test": "npm run build && node --test test/contracts.test.ts"
+  },
+  "dependencies": {
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.0",
+    "typescript": "~5.9.3"
+  }
+}

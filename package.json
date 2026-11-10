@@ -1,0 +1,10 @@
+{
+  "name": "signova",
+  "private": true,
+  "workspaces": ["shared/contracts", "backend/api"],
+  "scripts": {
+    "build:contracts": "npm run build -w @signova/contracts",
+    "test:contracts": "npm test -w @signova/contracts",
+    "api": "npm run start:dev -w @signova/api"
+  }
+}

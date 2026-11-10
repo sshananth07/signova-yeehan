@@ -1,0 +1,17 @@
+{
+  // Built as CommonJS for NestJS. The frontend imports the TypeScript source through the
+  // `@contracts` alias, so the source must also pass the frontend's stricter settings:
+  // `import type` for types, no enums, no namespaces.
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "declaration": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "strict": true,
+    "noUnusedLocals": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true
+  },
+  "include": ["src"]
+}

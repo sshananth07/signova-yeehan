@@ -1,0 +1,7 @@
+{
+  "projects": {
+    "default": "demo-signova",
+    "dev": "TODO-signova-dev",
+    "prod": "TODO-signova-prod"
+  }
+}

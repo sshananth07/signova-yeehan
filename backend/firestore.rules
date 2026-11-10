@@ -1,0 +1,26 @@
+rules_version = '2';
+
+// Plan 00, "Security rules". Phase A denies everything; Task B.2 replaces the body below.
+//
+// TODO(B.2):
+//  1. Clients NEVER write: keep `allow write: if false` on every path. NestJS writes with the Admin SDK.
+//  2. Helpers:
+//       isDevice()  = request.auth.token.kind == 'device'
+//       isStaff()   = request.auth.token.kind == 'staff'
+//       board(v)    = isDevice() && request.auth.token.role == 'board' && v.deviceId == request.auth.token.deviceId
+//       wardOf(v)   = (isDevice() && request.auth.token.role == 'station' && v.ward == request.auth.token.ward)
+//                  || (isStaff() && v.ward in request.auth.token.wards)
+//  3. devices/{id}: a board/station reads its own doc only (resource.id == token.deviceId).
+//  4. configSets/{id}: a device reads the set its device doc points at (get() the device doc).
+//  5. visits/{v} and every subcollection (events, replies, questions, checks, alarms, consents,
+//     and later painChecks, stationNotes): read if board(visit) || wardOf(visit).
+//     Subcollections get() the parent visit to evaluate.
+//  6. staff, audit, idempotency, and visits/{v}/forms (plan 01): no client reads.
+//  7. Write the rules tests first (backend/api/test/rules/rules.spec.ts), one per Review focus item.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

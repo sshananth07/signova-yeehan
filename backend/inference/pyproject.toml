@@ -1,0 +1,25 @@
+[project]
+name = "signova-inference"
+version = "0.0.0"
+description = "Heavy model work for Signova (plans 02 and 03). Stateless; never stores images."
+requires-python = ">=3.12"
+dependencies = [
+  "flask>=3.1,<4",
+  "firebase-admin>=6.9,<8",
+  "gunicorn>=23,<24",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+# Added by plan 03 Task 4.3 once a model adapter is approved:
+# models = ["torch", "torchvision", "pillow"]
+
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

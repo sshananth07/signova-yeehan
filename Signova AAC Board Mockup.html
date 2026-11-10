@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Signova AAC Board Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: fixed zones that never move (message on top, quick replies on the left, Emergency bottom-right); only the card area changes. */
+:root{
+  --bg:#F3F5FA; --surface:#FFFFFF; --surface-2:#F7F8FC; --ink:#141A33; --ink-2:#38405F; --muted:#5B6483; --line:#E3E6F0; --line-2:#CFD4E3;
+  --brand:#3D4BD8; --brand-ink:#2E3AB8; --brand-soft:#ECEEFE; --on-brand:#FFFFFF; --on-solid:#FFFFFF;
+  --yes:#11805B; --yes-soft:#E1F5EC; --no:#C0392B; --no-soft:#FDECEA; --danger:#CF2619; --danger-ink:#AE2016;
+  --c-need:#1667C0; --c-need-s:#E5F0FC;
+  --c-care:#0A6C72; --c-care-s:#DCF2F2;
+  --c-health:#C2440E; --c-health-s:#FEEBDF;
+  --c-feel:#8C5800; --c-feel-s:#FFF1C7;
+  --c-ask:#AE236D; --c-ask-s:#FCE6F1;
+  --c-desk:#13744C; --c-desk-s:#DFF3E8;
+  --shadow-sm:0 1px 2px rgba(28,38,92,.06);
+  --shadow:0 2px 4px rgba(28,38,92,.05), 0 4px 10px rgba(28,38,92,.06);
+  --shadow-lg:0 6px 12px rgba(28,38,92,.07), 0 14px 28px rgba(28,38,92,.10);
+  --font:"Atkinson Hyperlegible Next","Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  --r:14px; --r-lg:20px; --foot:76px;
+  --ease:cubic-bezier(.16,1,.3,1);
+  color-scheme: light;
+}
+body.night{
+  --bg:#0D1120; --surface:#151A2D; --surface-2:#1A2036; --ink:#E8EBF6; --ink-2:#C5CADC; --muted:#9CA4BF; --line:#262E47; --line-2:#343D5B;
+  --brand:#8E99FF; --brand-ink:#AEB6FF; --brand-soft:#232A54; --on-brand:#0D1120; --on-solid:#0D1120;
+  --yes:#52CB9E; --yes-soft:#15302A; --no:#FF8F84; --no-soft:#3A1E20;
+  --c-need:#7DB7FF; --c-need-s:#18294A; --c-care:#5CD3D6; --c-care-s:#123234; --c-health:#FF9B66; --c-health-s:#3A2216;
+  --c-feel:#F5C451; --c-feel-s:#352A12; --c-ask:#FF8FC7; --c-ask-s:#3A1A2D; --c-desk:#5ED39B; --c-desk-s:#123326;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.3); --shadow:0 2px 6px rgba(0,0,0,.35); --shadow-lg:0 10px 26px rgba(0,0,0,.45);
+  color-scheme: dark;
+}
+[data-cat="need"]{--c:var(--c-need);--cs:var(--c-need-s)}
+[data-cat="care"]{--c:var(--c-care);--cs:var(--c-care-s)}
+[data-cat="health"]{--c:var(--c-health);--cs:var(--c-health-s)}
+[data-cat="feel"]{--c:var(--c-feel);--cs:var(--c-feel-s)}
+[data-cat="ask"]{--c:var(--c-ask);--cs:var(--c-ask-s)}
+[data-cat="desk"]{--c:var(--c-desk);--cs:var(--c-desk-s)}
+[data-cat="base"]{--c:var(--brand-ink);--cs:var(--brand-soft)}
+[data-cat="sos"]{--c:var(--danger);--cs:var(--no-soft)}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.4;-webkit-font-smoothing:antialiased;caret-color:var(--brand);transition:background-color .3s}
+*{scrollbar-width:thin;scrollbar-color:var(--line-2) transparent}
+::selection{background:var(--brand-soft);color:var(--ink)}
+button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:disabled{cursor:not-allowed}
+:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.01em;text-wrap:balance}
+svg.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}}
+@keyframes fade{from{opacity:0}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
+
+.app{height:100%;display:grid;grid-template-rows:auto auto 1fr auto;min-width:0}
+
+/* Top bar */
+.top{display:flex;align-items:center;gap:12px;padding:10px 20px;min-height:64px;background:var(--surface);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;margin-right:6px}
+.logo{width:38px;height:38px;border-radius:11px;background:var(--brand);color:var(--on-brand);display:grid;place-items:center;box-shadow:0 3px 8px rgba(61,75,216,.3)}
+.logo svg{width:24px;height:24px}
+.brand b{font-size:18px;font-weight:800;letter-spacing:-.02em;display:block;line-height:1.1}
+.brand small{color:var(--muted);font-size:12.5px}
+.seg{display:inline-flex;gap:2px;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:3px}
+.seg button{display:inline-flex;align-items:center;gap:7px;border:0;background:none;padding:7px 14px;border-radius:9px;font-weight:700;font-size:14.5px;color:var(--muted);min-height:40px;transition:background-color .2s var(--ease),color .2s,box-shadow .2s}
+.seg button svg.i{width:18px;height:18px}
+.seg button:hover{color:var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.seg button[aria-pressed="true"] svg.i{color:var(--brand)}
+.ctx{display:inline-flex;align-items:center;gap:7px;font-size:14px;color:var(--muted);padding:9px 12px;border-radius:10px;background:var(--surface-2)}
+.ctx svg.i{width:16px;height:16px;color:var(--brand)}
+.ctx b{color:var(--ink)}
+.spacer{flex:1}
+.tbtn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);padding:8px 14px;border-radius:12px;font-weight:700;font-size:14.5px;min-height:44px;box-shadow:var(--shadow-sm);transition:background-color .2s,border-color .2s}
+.tbtn:hover{background:var(--surface-2);border-color:var(--line-2)}
+.tbtn svg.i{width:18px;height:18px}
+.tbtn .chev{width:16px;height:16px;color:var(--muted)}
+.tbtn.ai{background:var(--brand-soft);border-color:transparent;color:var(--brand-ink)}
+.tbtn.ai:hover{border-color:var(--brand)}
+.tbtn.ai:disabled{opacity:1}
+
+/* Staff menu (native popover) */
+.menu{position:fixed;inset:auto;top:70px;right:16px;margin:0;width:310px;padding:6px;border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--ink);box-shadow:var(--shadow-lg)}
+.menu:popover-open{display:grid;gap:2px;animation:menuIn .18s var(--ease)}
+@keyframes menuIn{from{opacity:0;transform:translateY(-6px) scale(.98)}}
+.mi{display:flex;align-items:center;gap:12px;border:0;background:none;border-radius:11px;padding:10px 12px;text-align:left;min-height:58px}
+.mi:hover{background:var(--surface-2)}
+.mi .mic{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--brand-soft);color:var(--brand-ink);flex:none}
+.mi .mic svg.i{width:19px;height:19px}
+.mi b{display:block;font-size:15px}
+.mi small{color:var(--muted);font-size:13px}
+.mi .on{margin-left:auto;font-size:12px;font-weight:700;border-radius:999px;padding:3px 9px;background:var(--surface-2);color:var(--muted)}
+.mi[aria-pressed="true"] .on{background:var(--yes-soft);color:var(--yes)}
+
+/* Message composer */
+.composer{margin:12px 20px 0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:14px 18px;display:grid;grid-template-columns:1fr auto;gap:12px 22px;box-shadow:var(--shadow)}
+.compose-main{min-width:0;display:grid;gap:10px;align-content:start}
+.chips{display:flex;gap:8px;flex-wrap:wrap;min-height:34px;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:8px;background:var(--cs);color:var(--ink);border-radius:999px;padding:3px 3px 3px 12px;font-size:14.5px;font-weight:700}
+.chip .src{font-weight:500;color:var(--ink-2);font-size:12.5px}
+.chip button{border:0;background:var(--surface);width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:var(--muted);transition:color .15s}
+.chip button svg.i{width:14px;height:14px}
+.chip button:hover{color:var(--no)}
+.chip.pop{animation:pop .5s var(--ease)}
+@keyframes pop{from{opacity:0;transform:scale(.6) translateY(6px)}}
+.hint{display:inline-flex;align-items:center;gap:8px;color:var(--muted);font-size:14.5px}
+.hint svg.i{width:18px;height:18px;color:var(--brand)}
+.say{min-width:0}
+.say-main{font-size:34px;font-weight:700;line-height:1.16;letter-spacing:-.015em;text-wrap:pretty}
+.say-sub{font-size:19px;color:var(--muted);margin-top:4px}
+.say.long .say-main{font-size:28px}
+.say.empty .say-main{color:var(--muted);font-weight:600}
+.say .tag{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--brand-ink);background:var(--brand-soft);border-radius:999px;padding:3px 10px;margin-bottom:6px}
+.say .tag svg.i{width:14px;height:14px}
+.ctrls{display:grid;gap:8px;align-content:start;width:264px}
+.speak{display:flex;align-items:center;gap:14px;background:var(--brand);color:var(--on-brand);border:0;border-radius:16px;padding:12px 18px 12px 12px;font-weight:800;font-size:19px;min-height:74px;text-align:left;box-shadow:0 6px 14px rgba(61,75,216,.28);transition:transform .15s var(--ease),background-color .2s}
+.speak:hover{background:var(--brand-ink)}
+.speak:active{transform:scale(.98)}
+.speak small{display:block;font-weight:500;font-size:13px;opacity:.88}
+.speak-ic{width:48px;height:48px;border-radius:13px;background:rgba(255,255,255,.18);display:grid;place-items:center;flex:none}
+.bars{display:none;gap:3px;align-items:center;height:22px}
+.bars i{width:4px;height:6px;border-radius:2px;background:currentColor;animation:bar .8s ease-in-out infinite}
+.bars i:nth-child(2){animation-delay:.12s}.bars i:nth-child(3){animation-delay:.24s}.bars i:nth-child(4){animation-delay:.36s}
+@keyframes bar{50%{height:22px}}
+body.speaking .speak-ic svg{display:none}
+body.speaking .bars{display:flex}
+.ctrl-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ghost{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:6px;font-weight:700;font-size:13px;min-height:54px;color:var(--ink-2);transition:background-color .2s,border-color .2s}
+.ghost svg.i{width:19px;height:19px}
+.ghost:hover{background:var(--surface-2);border-color:var(--line-2)}
+
+/* AI wording, inside the composer */
+.aistrip{grid-column:1/-1;border-top:1px dashed var(--line-2);padding-top:10px;display:flex;gap:10px;align-items:stretch;overflow-x:auto;animation:fadeUp .25s var(--ease)}
+.aistrip .lbl{display:flex;align-items:center;gap:10px;font-weight:700;color:var(--brand-ink);font-size:14px;line-height:1.25;flex:0 0 170px}
+.aistrip .lbl .spark{width:36px;height:36px;border-radius:10px;background:var(--brand-soft);display:grid;place-items:center;flex:none}
+.aistrip .lbl .spark svg.i{width:19px;height:19px}
+.aistrip .lbl small{display:block;font-weight:500;color:var(--muted);font-size:12.5px}
+.cand{border:1px solid var(--line);background:var(--surface-2);border-radius:14px;padding:8px 12px;text-align:left;flex:1 1 300px;min-width:240px;font-size:14.5px;font-weight:600;line-height:1.3;transition:background-color .2s,border-color .2s}
+.cand:hover{border-color:var(--brand);background:var(--brand-soft)}
+.cand .txt{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cand .uses{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--yes);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cand .uses svg.i{flex:none}
+.cand .uses svg.i{width:13px;height:13px}
+.blocked{flex:0 0 140px;font-size:13px;color:var(--muted);border:0;background:none;text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line-2);text-align:left}
+.blockedbox{flex:0 0 260px;font-size:13px;color:var(--muted);background:var(--surface-2);border-radius:12px;padding:8px 12px}
+.blockedbox s{color:var(--no)}
+
+/* Body */
+.body{display:grid;grid-template-columns:200px 1fr;gap:20px;padding:14px 20px 12px;min-height:0;overflow:hidden}
+.rail{display:flex;flex-direction:column;gap:6px;min-height:0;overflow:auto;padding:2px}
+.rail h3{font-size:12.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding:2px}
+.qr{display:flex;align-items:center;gap:12px;border:1px solid var(--line);background:var(--surface);border-radius:16px;padding:8px 12px 8px 10px;min-height:50px;text-align:left;font-weight:700;font-size:17px;line-height:1.2;box-shadow:var(--shadow-sm);transition:transform .15s var(--ease),border-color .2s}
+.qr .qi{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:var(--surface-2);color:var(--ink-2);flex:none}
+.qr .qi svg.i{width:21px;height:21px}
+.qr small{display:block;font-weight:500;font-size:12.5px;color:var(--muted)}
+.qr:hover{border-color:var(--line-2)}
+.qr:active{transform:scale(.97)}
+.qr.yes,.qr.no{min-height:64px;font-size:22px;border-color:transparent}
+.qr.yes{background:var(--yes-soft);color:var(--yes)} .qr.yes .qi{background:var(--yes);color:var(--on-solid)}
+.qr.no{background:var(--no-soft);color:var(--no)} .qr.no .qi{background:var(--no);color:var(--on-solid)}
+.qr.yes small,.qr.no small{color:inherit}
+.qr.yes:hover{border-color:var(--yes)} .qr.no:hover{border-color:var(--no)}
+.qr.sent{animation:nudge .4s var(--ease)}
+@keyframes nudge{40%{transform:scale(1.04)}}
+.main{display:flex;flex-direction:column;gap:10px;min-height:0;min-width:0;overflow:hidden}
+
+.staffask{background:var(--brand-soft);border-radius:var(--r-lg);padding:14px 16px;display:grid;gap:12px;animation:fadeUp .25s var(--ease)}
+.staffask .meta{font-size:12.5px;color:var(--brand-ink);font-weight:700;display:flex;align-items:center;gap:6px}
+.staffask .meta svg.i{width:15px;height:15px}
+.staffask .q{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.staffask .q b{font-size:24px}
+.staffask .q span{color:var(--ink-2)}
+.dismiss{margin-left:auto;display:inline-flex;align-items:center;gap:6px;border:0;background:var(--surface);border-radius:10px;padding:8px 12px;font-weight:700;font-size:14px;min-height:44px;color:var(--ink-2)}
+.dismiss svg.i{width:16px;height:16px}
+.answers{display:flex;gap:10px;flex-wrap:wrap}
+.ans{border:1.5px solid transparent;background:var(--surface);border-radius:14px;padding:10px 18px;font-weight:700;font-size:17px;min-height:62px;min-width:130px;text-align:left;box-shadow:var(--shadow);transition:border-color .2s,transform .15s var(--ease)}
+.ans:hover{border-color:var(--brand)}
+.ans:active{transform:scale(.97)}
+.ans small{display:block;font-weight:500;font-size:13px;color:var(--muted)}
+
+.tabs{display:inline-flex;align-self:flex-start;gap:4px;padding:4px;background:var(--surface-2);border:1px solid var(--line);border-radius:14px;flex-wrap:wrap;max-width:100%}
+.tab{border:0;background:none;padding:6px 14px 6px 7px;border-radius:10px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:9px;font-size:15px;min-height:46px;transition:background-color .2s var(--ease),color .2s,box-shadow .2s}
+.tab .ti{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:var(--cs);color:var(--c)}
+.tab .ti svg.i{width:17px;height:17px}
+.tab small{font-weight:500;font-size:13px}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+body.night .tab[aria-selected="true"],body.night .seg button[aria-pressed="true"]{background:var(--line-2)}
+
+.suggest{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.suggest .why{display:flex;flex-direction:column;font-size:12.5px;color:var(--muted);margin-right:6px;min-width:120px}
+.suggest .why b{display:flex;align-items:center;gap:5px;color:var(--brand-ink);font-size:13.5px}
+.suggest .why svg.i{width:15px;height:15px}
+.mini{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 16px 5px 5px;font-weight:700;min-height:48px;font-size:15px;box-shadow:var(--shadow-sm);transition:border-color .2s,transform .15s var(--ease)}
+.mini .ic{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--cs);color:var(--c)}
+.mini .ic svg.i{width:19px;height:19px}
+.mini:hover{border-color:var(--c)}
+.mini:active{transform:scale(.97)}
+
+.scroll{flex:1;overflow:auto;min-height:0;padding:4px 4px 10px;margin:-4px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.card{position:relative;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:12px;border:1px solid var(--line);background:var(--surface);border-radius:18px;padding:14px;min-height:126px;text-align:left;box-shadow:var(--shadow-sm);transition:transform .2s var(--ease),box-shadow .2s,border-color .2s}
+.card:hover{border-color:color-mix(in srgb,var(--c) 40%,var(--line));box-shadow:var(--shadow-lg);transform:translateY(-2px)}
+.card:active{transform:scale(.97);box-shadow:var(--shadow-sm)}
+.card .ic{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;background:var(--cs);color:var(--c);transition:transform .25s var(--ease)}
+.card:hover .ic{transform:scale(1.06)}
+.card .ic svg.i{width:28px;height:28px}
+.card b{font-size:18px;display:block;line-height:1.2}
+.card small{color:var(--muted);font-size:14px}
+.card .go{position:absolute;top:12px;right:12px;display:inline-flex;align-items:center;gap:3px;font-size:12px;font-weight:700;color:var(--c);background:var(--cs);border-radius:999px;padding:4px 8px 4px 10px}
+.card .go svg.i{width:13px;height:13px}
+.card .tick{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;background:var(--yes);color:var(--on-solid);display:grid;place-items:center;opacity:0;transform:scale(.4);pointer-events:none}
+.card .tick svg.i{width:18px;height:18px;stroke-width:3}
+.card.sent{border-color:var(--yes)}
+.card.sent .tick{animation:tick 1s var(--ease)}
+@keyframes tick{15%,70%{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(1)}}
+.card.opener{grid-column:span 2;background:var(--brand);color:var(--on-brand);border-color:transparent;box-shadow:0 8px 18px rgba(61,75,216,.25)}
+.card.opener:hover{border-color:transparent}
+.card.opener b{font-size:22px}
+.card.opener small{color:inherit;opacity:.88}
+.card.opener .ic{background:rgba(255,255,255,.18);color:inherit}
+
+.typepanel,.drawpanel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px;display:grid;gap:12px;box-shadow:var(--shadow-sm)}
+.typepanel label b,.drawpanel .row b{font-size:17px}
+.typepanel textarea{width:100%;min-height:118px;font:inherit;font-size:24px;padding:14px;border:1px solid var(--line-2);border-radius:14px;background:var(--surface-2);color:var(--ink);resize:vertical;transition:border-color .2s,box-shadow .2s}
+.typepanel textarea:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 4px var(--brand-soft)}
+.typepanel textarea::placeholder{color:var(--muted)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.wordchip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 16px;font-weight:700;min-height:44px;transition:border-color .2s}
+.wordchip:hover{border-color:var(--brand)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;background:var(--brand);color:var(--on-brand);border-radius:12px;padding:12px 20px;font-weight:700;min-height:52px;transition:background-color .2s,transform .15s var(--ease)}
+.btn svg.i{width:19px;height:19px}
+.btn:hover{background:var(--brand-ink)}
+.btn:active{transform:scale(.98)}
+.btn.alt{background:var(--surface);color:var(--ink);border:1px solid var(--line-2)}
+.btn.alt:hover{background:var(--surface-2)}
+.btn:disabled{opacity:.45;transform:none}
+.note{font-size:13px;color:var(--muted)}
+#pad{width:100%;height:280px;background:#fff;border:1px solid var(--line-2);border-radius:14px;touch-action:none;cursor:crosshair}
+
+/* Footer */
+.foot{position:relative;z-index:70;display:flex;align-items:center;gap:16px;padding:0 20px;height:var(--foot);background:var(--surface);border-top:1px solid var(--line)}
+.foot .loc{display:flex;align-items:center;gap:10px;font-size:14px;min-width:0}
+.foot .loc .pin{width:38px;height:38px;border-radius:11px;background:var(--surface-2);display:grid;place-items:center;color:var(--brand);flex:none}
+.foot .loc .pin svg.i{width:19px;height:19px}
+.foot .loc b{display:block}
+.foot .loc span{color:var(--muted)}
+.status{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);padding:7px 12px;border-radius:999px;background:var(--surface-2)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--yes);box-shadow:0 0 0 3px var(--yes-soft)}
+.emergency{display:flex;align-items:center;gap:12px;background:var(--danger);color:#fff;border:0;border-radius:16px;padding:8px 24px 8px 8px;font-weight:800;font-size:19px;letter-spacing:.03em;min-height:60px;text-align:left;box-shadow:0 6px 16px rgba(217,45,32,.32);transition:background-color .2s,transform .15s var(--ease)}
+.emergency:hover{background:var(--danger-ink)}
+.emergency:active{transform:scale(.98)}
+.emergency .ei{width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.2);display:grid;place-items:center}
+.emergency small{display:block;font-size:12px;font-weight:500;letter-spacing:0}
+
+/* Modals */
+.modal{position:fixed;inset:0 0 var(--foot) 0;z-index:50;background:rgba(14,18,40,.42);backdrop-filter:blur(3px);display:grid;place-items:center;padding:16px;animation:fade .2s}
+.sheet{background:var(--surface);border-radius:24px;width:min(1160px,100%);max-height:100%;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 60px rgba(14,18,40,.28);animation:sheetIn .3s var(--ease)}
+@keyframes sheetIn{from{opacity:0;transform:translateY(14px) scale(.985)}}
+.sheet-h{display:flex;align-items:flex-start;gap:14px;padding:18px 22px;border-bottom:1px solid var(--line)}
+.sheet-h .hi{width:46px;height:46px;border-radius:13px;background:var(--cs,var(--brand-soft));color:var(--c,var(--brand-ink));display:grid;place-items:center;flex:none}
+.sheet-h h2{font-size:23px}
+.sheet-h p{margin:3px 0 0;color:var(--muted);font-size:14.5px}
+.x{margin-left:auto;border:1px solid var(--line);background:var(--surface);width:46px;height:46px;border-radius:12px;display:grid;place-items:center;color:var(--ink-2);flex:none;transition:background-color .2s}
+.x:hover{background:var(--surface-2)}
+.x svg.i{width:20px;height:20px}
+.sheet-f{display:flex;align-items:center;gap:10px;padding:14px 22px;border-top:1px solid var(--line);flex-wrap:wrap;background:var(--surface-2)}
+.preview{flex:1;min-width:200px;font-size:16px;font-weight:600}
+.preview small{display:block;color:var(--muted);font-weight:500}
+.err,.todo{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:14.5px}
+.err{color:var(--no)} .todo{color:var(--ink-2)}
+.err svg.i,.todo svg.i{width:18px;height:18px}
+.todo svg.i{color:var(--brand)}
+
+.painbody{display:grid;grid-template-columns:minmax(300px,420px) 1fr;gap:24px;padding:18px 22px;overflow:auto;min-height:0}
+.viewer{display:flex;flex-direction:column;gap:10px}
+.canvas3d{position:relative;height:380px;border-radius:18px;background:radial-gradient(circle at 50% 30%,#FFFFFF,#E7EAF5);border:1px solid var(--line);overflow:hidden}
+body.night .canvas3d{background:radial-gradient(circle at 50% 30%,#232A44,#111527)}
+.canvas3d canvas{display:block;width:100%;height:100%;touch-action:none}
+.canvas3d .fallback{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:20px;color:var(--muted)}
+.canvas3d .tip{position:absolute;left:10px;bottom:10px;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;background:var(--surface);border:1px solid var(--line);padding:5px 10px;border-radius:999px;color:var(--ink-2);box-shadow:var(--shadow-sm)}
+.views{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.views button{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 4px;font-weight:700;font-size:13px;min-height:44px;color:var(--ink-2);transition:background-color .2s,border-color .2s}
+.views button:hover{border-color:var(--line-2)}
+.views button[aria-pressed="true"]{border-color:var(--brand);color:var(--brand-ink);background:var(--brand-soft)}
+.form{display:grid;gap:20px;align-content:start}
+.step h3{font-size:17px;display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.step h3 small{font-weight:500;color:var(--muted);font-size:14px}
+.num{width:28px;height:28px;border-radius:50%;background:var(--surface-2);border:1.5px solid var(--line-2);color:var(--ink-2);display:grid;place-items:center;font-size:13.5px;font-weight:800;flex:none;transition:background-color .25s,border-color .25s}
+.num svg.i{display:none;width:15px;height:15px;stroke-width:3}
+.step.done .num{background:var(--yes);border-color:var(--yes);color:var(--on-solid);animation:nudge .35s var(--ease)}
+.step.done .num b{display:none}
+.step.done .num svg.i{display:block}
+.pb,.sides button,.sc,.ty,.opt{border:1.5px solid var(--line-2);background:var(--surface);border-radius:12px;font-weight:700;color:var(--ink);transition:background-color .18s,border-color .18s,box-shadow .18s,transform .15s var(--ease)}
+.pb:hover,.sides button:not(:disabled):hover,.sc:hover,.ty:hover,.opt:hover{border-color:var(--c,var(--brand))}
+.pb:active,.sc:active,.ty:active,.opt:active{transform:scale(.96)}
+.pb[aria-pressed="true"],.sides button[aria-pressed="true"],.ty[aria-pressed="true"],.opt[aria-pressed="true"]{border-color:var(--c,var(--brand));background:var(--cs,var(--brand-soft));color:var(--c,var(--brand-ink));box-shadow:0 0 0 3px var(--cs,var(--brand-soft))}
+.pb[aria-pressed="true"] small,.ty[aria-pressed="true"] small,.opt[aria-pressed="true"] small{color:inherit}
+.parts{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.pb{position:relative;padding:10px;text-align:left;min-height:62px;font-size:15px}
+.pb small{display:block;font-weight:500;color:var(--muted);font-size:12.5px}
+.pb.has::after{content:"";position:absolute;top:8px;right:8px;width:9px;height:9px;border-radius:50%;background:var(--c-health)}
+.sides{display:flex;gap:8px;margin-top:10px;align-items:center}
+.sides .lbl{font-size:13.5px;color:var(--muted);margin-right:4px}
+.sides button{padding:8px 20px;min-height:48px}
+.sides button small{font-weight:500}
+.sides button:disabled{opacity:.4}
+.sides.need button:not(:disabled){animation:pulse 1s ease-in-out 2}
+@keyframes pulse{50%{box-shadow:0 0 0 5px var(--brand-soft);border-color:var(--brand)}}
+.scores{display:grid;grid-template-columns:repeat(11,1fr);gap:6px}
+.sc{min-height:58px;font-size:20px;font-variant-numeric:tabular-nums}
+.sc[aria-pressed="true"]{background:var(--c,var(--brand));border-color:var(--c,var(--brand));color:var(--on-solid);transform:scale(1.06);box-shadow:0 6px 14px color-mix(in srgb,var(--c,var(--brand)) 30%,transparent)}
+.anchors{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-top:6px}
+.types,.opts{display:flex;gap:8px;flex-wrap:wrap}
+.ty{border-radius:999px;padding:8px 16px;min-height:48px}
+.ty small{font-weight:500;color:var(--muted)}
+.sites{display:grid;gap:6px}
+.sites > b{font-size:14px}
+.site{display:flex;align-items:center;gap:10px;background:var(--c-health-s);border-radius:12px;padding:6px 6px 6px 12px;font-size:14.5px;font-weight:600}
+.site::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--c-health);flex:none}
+.site button{margin-left:auto;border:0;background:var(--surface);border-radius:9px;padding:6px 12px;font-size:13px;font-weight:700;min-height:36px}
+
+.symgrid{display:grid;gap:20px;padding:18px 22px;overflow:auto}
+.opt{padding:10px 16px;min-height:62px;min-width:132px;text-align:left;font-size:16px}
+.opt small{display:block;font-weight:500;color:var(--muted);font-size:13px}
+
+/* Staff view */
+.staff{position:fixed;inset:0 0 var(--foot) 0;z-index:55;background:var(--bg);display:flex;flex-direction:column;animation:fade .2s}
+.staff .sheet-h{background:var(--surface);align-items:center}
+.staffbody{display:grid;grid-template-columns:1.35fr 1fr;gap:16px;padding:18px 22px;overflow:auto;min-height:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px;box-shadow:var(--shadow-sm)}
+.panel h3{font-size:16.5px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.panel h3 svg.i{width:19px;height:19px;color:var(--brand)}
+table{width:100%;border-collapse:collapse;font-size:14.5px}
+th{text-align:left;font-size:12.5px;color:var(--muted);font-weight:700;padding:8px;border-bottom:1px solid var(--line)}
+td{padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:var(--surface-2)}
+td.t{font-variant-numeric:tabular-nums;color:var(--muted);white-space:nowrap}
+.kind{display:inline-block;font-size:12px;font-weight:700;border-radius:6px;padding:2px 8px;background:var(--cs);color:var(--c);margin-right:4px;text-transform:capitalize}
+.seen{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-2);background:var(--surface);border-radius:10px;padding:6px 12px;font-size:13px;font-weight:700;min-height:40px;white-space:nowrap;transition:background-color .2s}
+.seen svg.i{width:15px;height:15px;stroke-width:2.5}
+.seen.done{color:var(--yes);border-color:transparent;background:var(--yes-soft)}
+.ref{display:inline-block;font-size:11.5px;font-weight:700;color:var(--brand-ink);background:var(--brand-soft);border-radius:5px;padding:1px 6px;margin-left:4px;font-variant-numeric:tabular-nums}
+.sumlist{margin:0;padding-left:18px;display:grid;gap:8px;font-size:15px}
+.sumlist li::marker{color:var(--brand)}
+.trend svg{width:100%;height:auto}
+.trend .g{stroke:var(--line)} .trend .gt{fill:var(--muted)} .trend .ln{stroke:var(--c-health)} .trend .ar{fill:var(--c-health);fill-opacity:.12}
+.trend .pt{fill:var(--surface);stroke:var(--c-health)} .trend .pt.last{fill:var(--c-health)} .trend .lbl{fill:var(--ink)}
+
+/* Emergency overlay */
+.alarm{position:fixed;inset:0;z-index:100;background:var(--danger);color:#fff;display:grid;place-items:center;text-align:center;padding:24px;animation:flash 1.2s ease-in-out infinite}
+.alarm .ring{width:104px;height:104px;border-radius:50%;background:rgba(255,255,255,.18);display:grid;place-items:center;margin:0 auto 20px;animation:ring 1.2s ease-out infinite}
+.alarm .ring svg.i{width:56px;height:56px}
+@keyframes ring{from{box-shadow:0 0 0 0 rgba(255,255,255,.55)}to{box-shadow:0 0 0 34px rgba(255,255,255,0)}}
+.alarm h2{font-size:56px;font-weight:800;letter-spacing:-.02em;color:#fff}
+.alarm p{font-size:24px;margin:8px 0}
+.alarm .acts{display:flex;gap:16px;justify-content:center;margin-top:28px;flex-wrap:wrap}
+.alarm button{display:inline-flex;align-items:center;gap:10px;border:0;border-radius:16px;padding:18px 28px;font-weight:800;font-size:20px;min-height:72px}
+.alarm .ack{background:#fff;color:var(--danger-ink)}
+.alarm .cancel{background:rgba(255,255,255,.14);color:#fff;border:2px solid #fff}
+.alarm .small{font-size:15px;opacity:.92;margin-top:22px}
+@keyframes flash{50%{background:#9E140E}}
+
+.big{position:fixed;inset:0 0 var(--foot) 0;z-index:58;background:#fff;display:grid;place-items:center;padding:20px}
+.big img{max-width:100%;max-height:85%;border:1px solid var(--line);border-radius:14px}
+
+/* Notes */
+.badge{display:none;position:absolute;z-index:5;top:-10px;left:-10px;width:26px;height:26px;border-radius:50%;background:#F2B705;color:#1b1400;font-weight:800;font-size:13px;place-items:center;box-shadow:0 2px 4px rgba(0,0,0,.25)}
+body.notes .badge{display:grid}
+.zone{position:relative}
+.drawer{position:fixed;top:0;right:0;bottom:var(--foot);width:min(400px,92vw);z-index:80;background:var(--surface);border-left:1px solid var(--line);box-shadow:-10px 0 30px rgba(14,18,40,.12);display:flex;flex-direction:column;animation:drawerIn .3s var(--ease)}
+@keyframes drawerIn{from{transform:translateX(24px);opacity:0}}
+.drawer .in{overflow:auto;padding:16px 20px;display:grid;gap:12px}
+.drawer ol{margin:0;padding-left:0;list-style:none;display:grid;gap:12px}
+.drawer li{display:grid;grid-template-columns:28px 1fr;gap:8px;font-size:14px}
+.drawer li .n{width:24px;height:24px;border-radius:50%;background:#F2B705;color:#1b1400;font-weight:800;font-size:12px;display:grid;place-items:center}
+.drawer h3{font-size:15px;margin-top:8px}
+.drawer ul{margin:0;padding-left:18px;font-size:14px;display:grid;gap:6px}
+
+.toast{position:fixed;left:50%;bottom:calc(var(--foot) + 16px);transform:translateX(-50%);z-index:90;display:flex;align-items:center;gap:10px;background:var(--ink);color:var(--surface);padding:9px 16px 9px 9px;border-radius:14px;font-size:14.5px;font-weight:600;max-width:80vw;box-shadow:var(--shadow-lg);animation:toastIn .3s var(--ease)}
+.toast .ti{width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.14);display:grid;place-items:center;flex:none}
+body.night .toast .ti{background:rgba(0,0,0,.08)}
+.toast .ti svg.i{width:16px;height:16px}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,10px)}}
+.listening{display:inline-flex;gap:3px;align-items:end;height:14px}
+.listening i{width:3px;border-radius:2px;background:currentColor;animation:lbar .6s ease-in-out infinite;height:6px}
+.listening i:nth-child(2){animation-delay:.15s}.listening i:nth-child(3){animation-delay:.3s}
+@keyframes lbar{50%{height:14px}}
+
+@media (max-width:1180px){ .ctx{display:none} .brand small{display:none} }
+@media (max-width:900px){
+  .app{height:auto;min-height:100%}
+  .body{grid-template-columns:1fr;overflow:visible}
+  .main,.scroll{overflow:visible}
+  .rail{flex-direction:row;flex-wrap:wrap;overflow:visible}
+  .rail h3{flex-basis:100%}
+  .qr{flex:1 1 140px}
+  .qr.yes,.qr.no{min-height:64px;font-size:19px}
+  .composer{grid-template-columns:1fr}
+  .ctrls{width:auto}
+  .say-main{font-size:28px}
+  .painbody,.staffbody{grid-template-columns:1fr}
+  .parts{grid-template-columns:repeat(3,1fr)}
+  .scores{grid-template-columns:repeat(6,1fr)}
+  .foot{position:sticky;bottom:0}
+  .status,.foot .loc span{display:none}
+  .tbtn span.lbl{display:none}
+}
+@media (max-width:520px){
+  .top{padding:10px 12px;gap:8px}
+  .composer{margin:12px 12px 0}
+  .body{padding:14px 12px}
+  .foot{padding:0 12px}
+  .grid{grid-template-columns:repeat(2,1fr)}
+  .card.opener{grid-column:1/-1}
+  .foot .loc{display:none}
+  .foot .zone{flex:1}
+  .emergency{width:100%;padding-right:16px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand"><div class="logo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 6.5A3 3 0 0 1 6.5 3.5h11a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3H12l-4.6 3.6a.6.6 0 0 1-1-.5v-3.1A3 3 0 0 1 3.5 13.5z" fill="currentColor"/><path d="M9 9.2v1.6M12 7.6v4.8M15 9.2v1.6" stroke="var(--brand)" stroke-width="2" stroke-linecap="round"/></svg></div><div><b>Signova</b><small>Communication board</small></div></div>
+    <div class="zone"><span class="badge">1</span>
+      <div class="seg" role="group" aria-label="Context profile">
+        <button id="pFD" aria-pressed="true"><svg class="i"><use href="#i-desk"/></svg>Front desk</button>
+        <button id="pBS" aria-pressed="false"><svg class="i"><use href="#i-bed"/></svg>Bedside</button>
+      </div>
+    </div>
+    <div class="ctx" id="ctx"></div>
+    <div class="spacer"></div>
+    <div class="seg" role="group" aria-label="Language">
+      <button id="lEN" aria-pressed="true">EN</button>
+      <button id="lBM" aria-pressed="false">BM</button>
+    </div>
+    <div class="zone"><span class="badge">5</span><button class="tbtn ai" id="staffMic"><svg class="i"><use href="#i-mic"/></svg><span id="micLbl">Staff: ask by voice</span></button></div>
+    <div class="zone"><span class="badge">10</span><button class="tbtn" id="staffMenuBtn" popovertarget="staffMenu" aria-haspopup="menu"><svg class="i"><use href="#i-clip"/></svg><span class="lbl">Staff</span><svg class="i chev"><use href="#i-chev"/></svg></button></div>
+  </header>
+
+  <div class="menu" id="staffMenu" popover role="menu" aria-label="Staff tools">
+    <button class="mi" id="staffBtn" role="menuitem"><span class="mic"><svg class="i"><use href="#i-clip"/></svg></span><span><b id="staffBtnLbl">Staff view</b><small>Messages, AI summary, pain reports</small></span></button>
+    <button class="mi" id="nightBtn" role="menuitemcheckbox" aria-pressed="false" hidden><span class="mic"><svg class="i"><use href="#i-moon"/></svg></span><span><b>Night mode</b><small>Dim the board for the ward</small></span><span class="on">Off</span></button>
+    <button class="mi" id="notesBtn" role="menuitemcheckbox" aria-pressed="false"><span class="mic"><svg class="i"><use href="#i-info"/></svg></span><span><b>Layout notes</b><small>Numbered notes on each zone</small></span><span class="on">Off</span></button>
+  </div>
+
+  <section class="composer zone" aria-live="polite"><span class="badge">2</span>
+    <div class="compose-main">
+      <div class="chips" id="chips"></div>
+      <div class="say" id="say"></div>
+    </div>
+    <div class="ctrls">
+      <button class="speak" id="speakAll"><span class="speak-ic"><svg class="i"><use href="#i-vol"/></svg><span class="bars"><i></i><i></i><i></i><i></i></span></span><span>Speak message<small id="speakSub">Sebut mesej</small></span></button>
+      <div class="ctrl-row">
+        <button class="ghost" id="replay"><svg class="i"><use href="#i-replay"/></svg>Replay</button>
+        <button class="ghost" id="stop"><svg class="i"><use href="#i-stop"/></svg>Stop</button>
+        <button class="ghost" id="undo"><svg class="i"><use href="#i-trash"/></svg>Clear</button>
+      </div>
+    </div>
+    <div class="aistrip zone" id="aistrip" hidden><span class="badge">3</span></div>
+  </section>
+
+  <div class="body">
+    <aside class="rail zone" id="rail"><span class="badge">4</span></aside>
+    <main class="main">
+      <section class="staffask" id="staffask" hidden></section>
+      <nav class="tabs zone" id="tabs" role="tablist"><span class="badge">7</span></nav>
+      <section class="suggest zone" id="suggest"><span class="badge">6</span></section>
+      <div class="scroll zone" id="content"><span class="badge">8</span></div>
+    </main>
+  </div>
+
+  <footer class="foot">
+    <div class="loc"><span class="pin"><svg class="i"><use href="#i-pin"/></svg></span><div id="loc"></div></div>
+    <div class="status" id="status"><span class="dot"></span>Speech ready · English and Malay</div>
+    <div class="zone" style="margin-left:auto"><span class="badge">9</span>
+      <button class="emergency" id="sos"><span class="ei"><svg class="i"><use href="#i-alert"/></svg></span><span>EMERGENCY<small>KECEMASAN · works on every screen</small></span></button>
+    </div>
+  </footer>
+</div>
+
+<!-- Pain modal -->
+<div class="modal" id="painModal" hidden>
+  <div class="sheet" data-cat="health" role="dialog" aria-modal="true" aria-labelledby="painTitle">
+    <div class="sheet-h">
+      <span class="hi"><svg class="i"><use href="#i-pulse"/></svg></span>
+      <div><h2 id="painTitle">Where does it hurt?</h2><p>Di manakah rasa sakit? Tap the body or a button. Both stay in sync.</p></div>
+      <button class="x" data-close="painModal" aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="painbody">
+      <div class="viewer">
+        <div class="canvas3d" id="body3d"><div class="fallback" id="fallback" hidden>3D view could not load on this device.<br>Use the buttons on the right.</div><span class="tip" id="tip3d">Tap a body part</span></div>
+        <div class="views" id="views"></div>
+        <p class="note">View buttons turn the model. No dragging or pinching needed. Patient's left is shown on your right in Front view.</p>
+      </div>
+      <div class="form">
+        <div class="step"><h3><span class="num"><b>1</b><svg class="i"><use href="#i-check"/></svg></span>Where? <small>Di mana?</small></h3>
+          <div class="parts" id="parts"></div>
+          <div class="sides" id="sides"><span class="lbl">Side</span><button id="sideL" disabled>Left <small>Kiri</small></button><button id="sideR" disabled>Right <small>Kanan</small></button></div>
+        </div>
+        <div class="step"><h3><span class="num"><b>2</b><svg class="i"><use href="#i-check"/></svg></span>How much does it hurt? <small>Tahap kesakitan</small></h3>
+          <div class="scores" id="scores"></div>
+          <div class="anchors"><span>0 · No pain / Tiada sakit</span><span>10 · Worst pain / Paling sakit</span></div>
+        </div>
+        <div class="step"><h3><span class="num"><b>3</b><svg class="i"><use href="#i-check"/></svg></span>What does it feel like? <small>Optional · Pilihan</small></h3>
+          <div class="types" id="types"></div>
+        </div>
+        <div class="sites" id="sites"></div>
+      </div>
+    </div>
+    <div class="sheet-f">
+      <div class="preview" id="painPrev"></div>
+      <button class="btn alt" id="addSite"><svg class="i"><use href="#i-plus"/></svg>Add another spot</button>
+      <button class="btn alt" data-close="painModal">Cancel</button>
+      <button class="btn" id="painSave"><svg class="i"><use href="#i-check"/></svg>Confirm and save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Symptom modal -->
+<div class="modal" id="symModal" hidden>
+  <div class="sheet" data-cat="health" role="dialog" aria-modal="true" aria-labelledby="symTitle" style="width:min(900px,100%)">
+    <div class="sheet-h">
+      <span class="hi"><svg class="i"><use href="#i-therm"/></svg></span>
+      <div><h2 id="symTitle">Tell us how you feel</h2><p>Beritahu simptom anda. Three quick taps.</p></div>
+      <button class="x" data-close="symModal" aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="symgrid">
+      <div class="step"><h3><span class="num"><b>1</b><svg class="i"><use href="#i-check"/></svg></span>What is it? <small>Apa simptomnya?</small></h3><div class="opts" id="symWhat"></div></div>
+      <div class="step"><h3><span class="num"><b>2</b><svg class="i"><use href="#i-check"/></svg></span>Since when? <small>Sejak bila?</small></h3><div class="opts" id="symWhen"></div></div>
+      <div class="step"><h3><span class="num"><b>3</b><svg class="i"><use href="#i-check"/></svg></span>How much? <small>Optional · Pilihan</small></h3><div class="opts" id="symHow"></div></div>
+    </div>
+    <div class="sheet-f">
+      <div class="preview" id="symPrev"></div>
+      <button class="btn alt" data-close="symModal">Cancel</button>
+      <button class="btn" id="symSave"><svg class="i"><use href="#i-check"/></svg>Confirm and save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Staff view -->
+<section class="staff" id="staff" hidden>
+  <div class="sheet-h">
+    <span class="hi"><svg class="i"><use href="#i-clip"/></svg></span>
+    <div><h2 id="staffTitle">Visit summary</h2><p id="staffSub"></p></div>
+    <button class="tbtn" id="copySum" style="margin-left:auto"><svg class="i"><use href="#i-copy"/></svg>Copy summary</button>
+    <button class="x" style="margin-left:0" id="staffClose" aria-label="Close staff view"><svg class="i"><use href="#i-x"/></svg></button>
+  </div>
+  <div class="staffbody">
+    <div class="panel"><h3><svg class="i"><use href="#i-chat"/></svg>Messages and requests</h3><table><thead><tr><th>#</th><th>Time</th><th>What the patient said</th><th>How</th><th>Status</th></tr></thead><tbody id="evRows"></tbody></table></div>
+    <div style="display:grid;gap:16px;align-content:start">
+      <div class="panel"><h3><svg class="i"><use href="#i-spark"/></svg><span id="sumTitle">AI summary</span></h3><ul class="sumlist" id="sumList"></ul><p class="note">Simulated AI output. Every line must cite at least one logged event (#); lines without a source are dropped. No triage labels.</p></div>
+      <div class="panel" id="trendPanel"><h3><svg class="i"><use href="#i-pulse"/></svg>Pain reports this stay</h3><div class="trend" id="trend"></div><p class="note">Patient-reported scores only. Display aid, not a clinical score.</p></div>
+    </div>
+  </div>
+</section>
+
+<div class="big" id="big" hidden><div style="text-align:center"><img id="bigImg" alt="Patient drawing shown to staff"><div class="row" style="justify-content:center;margin-top:12px"><button class="btn" id="bigClose">Back to board</button></div></div></div>
+
+<div class="alarm" id="alarm" hidden role="alertdialog" aria-labelledby="alarmT">
+  <div>
+    <div class="ring"><svg class="i"><use href="#i-alert"/></svg></div>
+    <h2 id="alarmT">PATIENT NEEDS HELP NOW</h2>
+    <p>PESAKIT PERLUKAN BANTUAN SEGERA</p>
+    <p id="alarmWhere" style="font-size:20px;opacity:.95"></p>
+    <div class="acts">
+      <button class="ack" id="ack"><svg class="i"><use href="#i-check"/></svg>Staff acknowledged · Staf sudah lihat</button>
+      <button class="cancel" id="cancelAlarm">Cancel, pressed by mistake</button>
+    </div>
+    <p class="small">This alarm sounds on this screen only. It does not call an ambulance.</p>
+  </div>
+</div>
+
+<aside class="drawer" id="drawer" hidden>
+  <div class="sheet-h"><div><h2>Layout notes</h2><p>Yellow numbers on the screen match this list.</p></div><button class="x" id="drawerClose" aria-label="Close notes"><svg class="i"><use href="#i-x"/></svg></button></div>
+  <div class="in">
+    <ol>
+      <li><span class="n">1</span><div><b>Context profile.</b> One switch changes cards, header, session rules and alerts between front desk and bedside. Everything else stays in the same place.</div></li>
+      <li><span class="n">2</span><div><b>Message bar.</b> The largest text on screen so staff can read it across a counter or from the doorway. Chips show each part of the message and how it was entered; any part can be removed.</div></li>
+      <li><span class="n">3</span><div><b>AI wording.</b> Appears inside the message bar only when two or more items are selected. Offers full sentences; nothing is spoken until the patient taps one. The fact guard hides suggestions that add things the patient never chose.</div></li>
+      <li><span class="n">4</span><div><b>Quick replies.</b> Fixed on the left in every tab and profile, so patients can answer staff without searching. "Not sure" avoids forced Yes/No answers.</div></li>
+      <li><span class="n">5</span><div><b>Staff asks by voice.</b> Staff speak a question; answer cards appear above the grid. Simulated here: the browser frame blocks the microphone.</div></li>
+      <li><span class="n">6</span><div><b>Suggested row.</b> Next likely cards from recent use and time of day. Separate from the grid so the grid never reshuffles.</div></li>
+      <li><span class="n">7</span><div><b>Tabs.</b> Main cards per profile, Health, and bedside-only Feelings and Ask staff. Type and Draw cover anything the cards cannot.</div></li>
+      <li><span class="n">8</span><div><b>Card grid.</b> Whole card is the tap target (no small "+" buttons). Pain and Symptoms open guided steps instead of adding a half sentence. Colour shows the card's group.</div></li>
+      <li><span class="n">9</span><div><b>Emergency.</b> Stays visible and tappable above every pop-up, including the pain map.</div></li>
+      <li><span class="n">10</span><div><b>Staff menu.</b> Staff-only tools in one place: visit summary at the front desk, shift handover with pain reports at the bedside, night mode and these notes.</div></li>
+    </ol>
+    <h3>Changes from the current design</h3>
+    <ul>
+      <li>Message text enlarged from caption size to 34px, with the translation underneath.</li>
+      <li>Small "+" buttons on cards removed; the whole card is one tap.</li>
+      <li>"Moderate / Severe" pain bands removed; only the patient's own number is shown.</li>
+      <li>Pain is confirmed before it enters the message, instead of syncing live.</li>
+      <li>Patient name replaced by counter or bed number.</li>
+      <li>Ward-only layout replaced by a front desk / bedside switch.</li>
+      <li>Emergency kept above pop-ups instead of being dimmed behind them.</li>
+      <li>Score buttons enlarged; the 3D body sits beside the location buttons.</li>
+      <li>Cards and tabs colour-coded by group: needs, care, health, feelings, questions, front desk.</li>
+      <li>AI sentence suggestions moved into the message bar; staff-only tools grouped under one Staff menu.</li>
+      <li>Every tap answers: a tick on the card, the new chip pops into the message, and Speak shows sound bars while talking.</li>
+      <li>Guided steps tick off as each one is done.</li>
+    </ul>
+  </div>
+</aside>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 2.7l5.7 5.7a8 8 0 1 1-11.3 0z"/></symbol>
+    <symbol id="i-toilet" viewBox="0 0 24 24"><rect x="6" y="3" width="6" height="7" rx="1"/><path d="M4 10h16v1a6 6 0 0 1-6 6h-4a6 6 0 0 1-6-6z"/><path d="M9 17l-1 4h8l-1-4"/></symbol>
+    <symbol id="i-pulse" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
+    <symbol id="i-therm" viewBox="0 0 24 24"><path d="M14 14.8V3.5a2.5 2.5 0 0 0-5 0v11.3a4.5 4.5 0 1 0 5 0z"/></symbol>
+    <symbol id="i-pill" viewBox="0 0 24 24"><path d="M10.5 20.5l10-10a5 5 0 1 0-7-7l-10 10a5 5 0 1 0 7 7z"/><path d="M8.5 8.5l7 7"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/></symbol>
+    <symbol id="i-steth" viewBox="0 0 24 24"><path d="M5 3v6a5 5 0 0 0 10 0V3"/><path d="M10 14v2a5 5 0 0 0 10 0v-2"/><circle cx="20" cy="12" r="2"/></symbol>
+    <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="M4.9 4.9l4.3 4.3M14.8 14.8l4.3 4.3M14.8 9.2l4.3-4.3M4.9 19.1l4.3-4.3"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></symbol>
+    <symbol id="i-q" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></symbol>
+    <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+    <symbol id="i-clip" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></symbol>
+    <symbol id="i-smile" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></symbol>
+    <symbol id="i-frown" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2M9 9h.01M15 9h.01"/></symbol>
+    <symbol id="i-meh" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 15h8M9 9h.01M15 9h.01"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></symbol>
+    <symbol id="i-snow" viewBox="0 0 24 24"><path d="M12 2v20M2 12h20M4.9 4.9l14.2 14.2M19.1 4.9L4.9 19.1"/></symbol>
+    <symbol id="i-turn" viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M20.5 15a9 9 0 1 1-2.1-9.4L23 10"/></symbol>
+    <symbol id="i-wind" viewBox="0 0 24 24"><path d="M9.6 4.6A2 2 0 1 1 11 8H2M12.6 19.4A2 2 0 1 0 14 16H2M17.7 7.7A2.5 2.5 0 1 1 19.5 12H2"/></symbol>
+    <symbol id="i-ear" viewBox="0 0 24 24"><path d="M6 8.5a6.5 6.5 0 1 1 13 0c0 6-6 6-6 10a3.5 3.5 0 1 1-7 0"/><path d="M15 8.5a2.5 2.5 0 0 0-5 0v1a2 2 0 1 1 0 4"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8z"/></symbol>
+    <symbol id="i-food" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></symbol>
+    <symbol id="i-vol" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4z"/><path d="M19.1 4.9a10 10 0 0 1 0 14.2M15.5 8.5a5 5 0 0 1 0 7"/></symbol>
+    <symbol id="i-kbd" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 17l.8 2.2L22 20l-2.2.8L19 23l-.8-2.2L16 20l2.2-.8z"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6M9 6V4h6v2"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></symbol>
+    <symbol id="i-replay" viewBox="0 0 24 24"><path d="M1 4v6h6"/><path d="M3.5 15a9 9 0 1 0 2.1-9.4L1 10"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21.2l7.8-7.7 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></symbol>
+    <symbol id="i-bed" viewBox="0 0 24 24"><path d="M2 4v16M2 8h18a2 2 0 0 1 2 2v10M2 17h20M6 8v9"/></symbol>
+    <symbol id="i-desk" viewBox="0 0 24 24"><path d="M3 10h18v3H3zM5 13v8M19 13v8"/><circle cx="12" cy="5" r="2.5"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></symbol>
+    <symbol id="i-tap" viewBox="0 0 24 24"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V10m0-.5a1.5 1.5 0 0 1 3 0v1m0 0a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-.6a6 6 0 0 1-4.7-2.3L4.4 15.6a1.5 1.5 0 0 1 2.3-1.9L9 16"/></symbol>
+  </defs>
+</svg>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+"use strict";
+const $ = s => document.querySelector(s);
+const T = (en, bm) => ({en, bm});
+const icon = id => `<svg class="i"><use href="#i-${id}"/></svg>`;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const now = () => { const d = new Date(); return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0'); };
+
+/* ---------- Vocabulary ---------- */
+const C = {
+  opener:{icon:'ear', label:T('I can hear you','Saya boleh dengar'), say:T('I can hear you, but I cannot speak. Please ask me yes or no questions.','Saya boleh dengar, tetapi saya tidak boleh bercakap. Sila tanya soalan ya atau tidak.'), kind:'request', short:T('Can hear, cannot speak','Boleh dengar, tak boleh cakap')},
+  register:{icon:'clip', label:T('Register','Daftar'), say:T('I would like to register.','Saya ingin mendaftar.'), kind:'request', short:T('Register','Daftar')},
+  appointment:{icon:'cal', label:T('Appointment','Temu janji'), say:T('I have an appointment.','Saya mempunyai temu janji.'), kind:'request', short:T('Has appointment','Ada temu janji')},
+  directions:{icon:'pin', label:T('Directions','Arah'), say:T('I would like to ask for directions.','Saya ingin bertanya arah.'), kind:'request', short:T('Directions','Arah')},
+  pharmacy:{icon:'pill', label:T('Pharmacy','Farmasi'), say:T('I would like directions to the pharmacy.','Saya ingin tahu arah ke farmasi.'), kind:'request', short:T('Pharmacy','Farmasi')},
+  pain:{icon:'pulse', label:T('Pain','Sakit'), action:'pain'},
+  symptoms:{icon:'therm', label:T('Symptoms','Simptom'), action:'sym'},
+  water:{icon:'drop', label:T('Water','Air'), say:T('I need water.','Saya perlukan air.'), kind:'need', short:T('Water','Air')},
+  toilet:{icon:'toilet', label:T('Toilet','Tandas'), say:T('I need the toilet.','Saya perlu ke tandas.'), kind:'need', short:T('Toilet','Tandas')},
+  help:{icon:'help', label:T('Help','Tolong'), say:T('I need help, please.','Tolong bantu saya.'), kind:'need', short:T('Help','Tolong')},
+  doctor:{icon:'steth', label:T('Doctor','Doktor'), say:T('I would like to see a doctor.','Saya ingin berjumpa doktor.'), kind:'need', short:T('Doctor','Doktor')},
+  nurse:{icon:'user', label:T('Nurse','Jururawat'), say:T('I need a nurse.','Saya perlukan jururawat.'), kind:'need', short:T('Nurse','Jururawat')},
+  medicine:{icon:'pill', label:T('Medicine','Ubat'), say:T('I need my medicine.','Saya perlukan ubat saya.'), kind:'need', short:T('Medicine','Ubat')},
+  thanks:{icon:'smile', label:T('Thank you','Terima kasih'), say:T('Thank you.','Terima kasih.'), kind:'reply', short:T('Thanks','Terima kasih')},
+  reposition:{icon:'turn', label:T('Reposition me','Ubah posisi'), say:T('Please help me change position.','Tolong ubah posisi saya.'), kind:'need', short:T('Reposition','Ubah posisi')},
+  cold:{icon:'snow', label:T('Cold / blanket','Sejuk / selimut'), say:T('I feel cold. May I have a blanket?','Saya rasa sejuk. Boleh beri selimut?'), kind:'need', short:T('Cold, blanket','Sejuk, selimut')},
+  lights:{icon:'sun', label:T('Lights','Lampu'), say:T('Please change the lights.','Tolong tukar lampu.'), kind:'need', short:T('Lights','Lampu')},
+  suction:{icon:'wind', label:T('Phlegm / suction','Kahak / sedut'), say:T('I have phlegm. I need suction.','Saya ada kahak. Saya perlu disedut.'), kind:'need', short:T('Suction','Sedut kahak')},
+  allergy:{icon:'alert', label:T('Allergy','Alahan'), say:T('I have an allergy.','Saya ada alahan.'), kind:'symptom', short:T('Allergy','Alahan')},
+  hungry:{icon:'food', label:T('Hungry','Lapar'), say:T('I am hungry.','Saya lapar.'), kind:'need', short:T('Hungry','Lapar')},
+  rest:{icon:'bed', label:T('Rest','Rehat'), say:T('I want to rest.','Saya mahu berehat.'), kind:'need', short:T('Rest','Rehat')},
+  scared:{icon:'frown', label:T('Scared','Takut'), say:T('I feel scared.','Saya rasa takut.'), kind:'feeling', short:T('Scared','Takut')},
+  frustrated:{icon:'meh', label:T('Frustrated','Kecewa'), say:T('I feel frustrated.','Saya rasa kecewa.'), kind:'feeling', short:T('Frustrated','Kecewa')},
+  tired:{icon:'moon', label:T('Tired','Penat'), say:T('I feel tired.','Saya rasa penat.'), kind:'feeling', short:T('Tired','Penat')},
+  lonely:{icon:'users', label:T('Lonely','Sunyi'), say:T('I feel lonely.','Saya rasa sunyi.'), kind:'feeling', short:T('Lonely','Sunyi')},
+  okay:{icon:'smile', label:T('I am okay','Saya okey'), say:T('I am feeling okay.','Saya rasa okey.'), kind:'feeling', short:T('Okay','Okey')},
+  loved:{icon:'heart', label:T('Thank my family','Terima kasih keluarga'), say:T('Please tell my family I love them.','Tolong beritahu keluarga saya sayang mereka.'), kind:'feeling', short:T('Message to family','Pesanan keluarga')},
+  qdoctor:{icon:'steth', label:T('When is the doctor coming?','Bila doktor datang?'), say:T('When will the doctor come?','Bila doktor akan datang?'), kind:'question', short:T('Asks: doctor when','Tanya: bila doktor')},
+  qeat:{icon:'food', label:T('Can I eat or drink?','Boleh saya makan/minum?'), say:T('Can I eat or drink now?','Boleh saya makan atau minum sekarang?'), kind:'question', short:T('Asks: eat/drink','Tanya: makan/minum')},
+  qhome:{icon:'home', label:T('When can I go home?','Bila boleh balik?'), say:T('When can I go home?','Bila saya boleh balik?'), kind:'question', short:T('Asks: go home','Tanya: balik')},
+  qfamily:{icon:'users', label:T('Can my family visit?','Keluarga boleh lawat?'), say:T('Can my family visit me?','Boleh keluarga saya melawat?'), kind:'question', short:T('Asks: family visit','Tanya: lawatan')},
+  qmed:{icon:'pill', label:T('What is this medicine?','Ubat ini untuk apa?'), say:T('What is this medicine for?','Ubat ini untuk apa?'), kind:'question', short:T('Asks: medicine','Tanya: ubat')},
+  qtest:{icon:'clip', label:T('Test results?','Keputusan ujian?'), say:T('Are my test results ready?','Keputusan ujian saya sudah siap?'), kind:'question', short:T('Asks: results','Tanya: keputusan')}
+};
+const QUICK = [
+  {k:'yes', cls:'yes', icon:'check', label:T('Yes','Ya'), say:T('Yes.','Ya.')},
+  {k:'no', cls:'no', icon:'x', label:T('No','Tidak'), say:T('No.','Tidak.')},
+  {k:'ns', icon:'q', label:T('Not sure','Tak pasti'), say:T('I am not sure.','Saya tidak pasti.')},
+  {k:'rep', icon:'repeat', label:T('Please repeat','Sila ulang'), say:T('Please repeat that.','Sila ulang.')},
+  {k:'wait', icon:'clock', label:T('Wait','Tunggu'), say:T('Please wait a moment.','Sila tunggu sebentar.')}
+];
+const PROFILES = {
+  fd:{ tabs:[['main',T('Front desk','Kaunter'),'grid'],['health',T('Health','Kesihatan'),'pulse'],['type',T('Type','Taip'),'kbd'],['draw',T('Draw','Lukis'),'pen']],
+       main:['opener','register','appointment','directions','pharmacy','pain','symptoms','water','toilet','help','thanks'],
+       health:['pain','symptoms','medicine','doctor','nurse','allergy','hungry','rest'],
+       ctx:'<b>Counter 3</b> · Registration', loc:['Hospital Kuala Lumpur','Front desk · Counter 3 · Visit started 21:40'],
+       staffTitle:'Visit summary', staffBtn:'Staff view' },
+  bs:{ tabs:[['main',T('Bedside','Katil'),'grid'],['health',T('Health','Kesihatan'),'pulse'],['feel',T('Feelings','Perasaan'),'heart'],['ask',T('Ask staff','Tanya staf'),'chat'],['type',T('Type','Taip'),'kbd'],['draw',T('Draw','Lukis'),'pen']],
+       main:['opener','water','toilet','pain','symptoms','reposition','cold','lights','suction','medicine','nurse','thanks'],
+       health:['pain','symptoms','medicine','doctor','nurse','allergy','hungry','rest'],
+       feel:['scared','frustrated','tired','lonely','okay','loved'],
+       ask:['qdoctor','qeat','qhome','qfamily','qmed','qtest'],
+       ctx:'<b>Wad 5B</b> · Katil 12', loc:['Hospital Kuala Lumpur','Wad 5B · Katil 12 · Admitted 3 days'],
+       staffTitle:'Shift handover', staffBtn:'Handover' }
+};
+const STAFF_Q = {
+  fd:[ {q:T('Do you have an appointment?','Ada temu janji?'), a:[['Yes, I do','Ya, ada'],['No','Tiada'],['I want to make one','Saya mahu buat temu janji'],['Not sure','Tak pasti']]},
+       {q:T('Since when has it hurt?','Sakit sejak bila?'), a:[['Since this morning','Sejak pagi tadi'],['Since last night','Sejak semalam'],['For a few days','Beberapa hari'],['Just now','Baru sahaja'],['Not sure','Tak pasti']]},
+       {q:T('Any drug allergies?','Ada alahan ubat?'), a:[['Yes','Ya'],['No','Tiada'],['Not sure','Tak pasti']]} ],
+  bs:[ {q:T('Since when has it hurt?','Sakit sejak bila?'), a:[['Since this morning','Sejak pagi tadi'],['Since last night','Sejak semalam'],['For a few days','Beberapa hari'],['Just now','Baru sahaja'],['Not sure','Tak pasti']]},
+       {q:T('Have you eaten?','Dah makan?'), a:[['Yes','Ya'],['A little','Sedikit'],['No','Belum'],['Not hungry','Tak lapar']]},
+       {q:T('Did you sleep well?','Tidur lena?'), a:[['Yes','Ya'],['Not really','Tidak berapa'],['No, pain kept me up','Tidak, sakit mengganggu'],['Not sure','Tak pasti']]} ]
+};
+const PARTS = [
+  {k:'head', l:T('Head','Kepala')},{k:'neck', l:T('Neck','Leher')},{k:'chest', l:T('Chest','Dada')},{k:'stomach', l:T('Stomach','Perut')},
+  {k:'upperback', l:T('Upper back','Belakang atas')},{k:'lowerback', l:T('Lower back','Belakang bawah')},
+  {k:'arm', l:T('Arm','Lengan'), limb:true},{k:'hand', l:T('Hand','Tangan'), limb:true},{k:'leg', l:T('Leg','Kaki'), limb:true},{k:'foot', l:T('Foot','Tapak kaki'), limb:true}
+];
+const PART = Object.fromEntries(PARTS.map(p => [p.k, p]));
+const TYPES = [['sharp',T('Sharp','Tajam')],['dull',T('Dull','Tumpul')],['burning',T('Burning','Rasa terbakar')],['throbbing',T('Throbbing','Berdenyut')],['cramping',T('Cramping','Memulas')]];
+const SYM_WHAT = [['fever','a fever','demam'],['dizzy','dizziness','pening'],['breath','shortness of breath','sesak nafas'],['headache','a headache','sakit kepala'],['vomit','vomiting','muntah'],['cough','a cough','batuk'],['chills','chills','rasa sejuk'],['allergy','an allergic reaction','alahan']];
+const SYM_LABEL = {fever:T('Fever','Demam'),dizzy:T('Dizzy','Pening'),breath:T('Short of breath','Sesak nafas'),headache:T('Headache','Sakit kepala'),vomit:T('Vomiting','Muntah'),cough:T('Cough','Batuk'),chills:T('Chills','Rasa sejuk'),allergy:T('Allergy','Alahan')};
+const SYM_WHEN = [['morning','since this morning','sejak pagi tadi',T('This morning','Pagi tadi')],['night','since last night','sejak semalam',T('Last night','Semalam')],['days','for a few days','sejak beberapa hari',T('A few days','Beberapa hari')],['now','starting just now','baru sahaja',T('Just now','Baru sahaja')]];
+const SYM_HOW = [['little','A little.','Sedikit sahaja.',T('A little','Sedikit')],['very','Very much.','Sangat kuat.',T('Very much','Sangat')]];
+
+/* ---------- State ---------- */
+const S = {
+  profile:'fd', lang:'en', tab:'main', items:[], aiChoice:null, lastSpoken:null, staffQIdx:{fd:0,bs:0}, activeQ:null,
+  events:{fd:[], bs:[]}, uid:1,
+  pain:{part:null, side:null, score:null, type:null, sites:[]},
+  sym:{what:null, when:null, how:null}
+};
+// Seeded bedside history (earlier in the stay)
+S.events.bs = [
+  {n:1,t:'06:40',kind:'need',en:'I need water.',bm:'Saya perlukan air.',src:'Card',seen:true},
+  {n:2,t:'08:10',kind:'pain',en:'I have sharp pain in my lower back, rated 7 out of 10.',bm:'Saya mengalami sakit tajam pada belakang bawah, tahap 7 daripada 10.',src:'3D pain map',seen:true,score:7,site:'Lower back'},
+  {n:3,t:'09:30',kind:'answer',en:'Staff asked "Have you eaten?" → A little.',bm:'Staf tanya "Dah makan?" → Sedikit.',src:'Staff question',seen:true},
+  {n:4,t:'10:05',kind:'need',en:'Please help me change position.',bm:'Tolong ubah posisi saya.',src:'Suggested row',seen:true},
+  {n:5,t:'12:30',kind:'pain',en:'I have pain in my lower back, rated 5 out of 10.',bm:'Saya mengalami sakit pada belakang bawah, tahap 5 daripada 10.',src:'3D pain map',seen:true,score:5,site:'Lower back'},
+  {n:6,t:'14:15',kind:'feeling',en:'I feel scared.',bm:'Saya rasa takut.',src:'Card',seen:false},
+  {n:7,t:'17:50',kind:'pain',en:'I have dull pain in my lower back, rated 4 out of 10.',bm:'Saya mengalami sakit tumpul pada belakang bawah, tahap 4 daripada 10.',src:'3D pain map',seen:true,score:4,site:'Lower back'}
+];
+
+/* Colour group per card / message kind */
+const CARE = new Set(['reposition','cold','lights','suction','rest']);
+const KIND_CAT = {pain:'health', symptom:'health', request:'desk', feeling:'feel', question:'ask', need:'need', alert:'sos'};
+const catOf = k => { const c = C[k]; if(!c) return 'base'; if(c.action) return 'health'; if(CARE.has(k)) return 'care'; return KIND_CAT[c.kind] || 'base'; };
+const kindCat = kind => KIND_CAT[kind] || 'base';
+const TAB_CAT = {health:'health', feel:'feel', ask:'ask'};
+
+const other = () => S.lang === 'en' ? 'bm' : 'en';
+const L = t => t[S.lang];
+const O = t => t[other()];
+
+/* ---------- Speech + toast ---------- */
+let toastTimer;
+function toast(msg, ic){ const t = $('#toast'); t.innerHTML = `<span class="ti">${icon(ic || 'check')}</span><span>${esc(msg)}</span>`; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.hidden = true, 2600); }
+let speakId = 0;
+function speakDone(id){ if(id === speakId) document.body.classList.remove('speaking'); }
+function speak(text){
+  S.lastSpoken = text;
+  const id = ++speakId;
+  document.body.classList.add('speaking');
+  let ok = false;
+  try{
+    if('speechSynthesis' in window){
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = S.lang === 'bm' ? 'ms-MY' : 'en-GB'; u.rate = .95;
+      u.onend = u.onerror = () => speakDone(id);
+      speechSynthesis.speak(u); ok = true;
+    }
+  }catch(e){}
+  // ponytail: fixed fallback timers; some browsers never fire onend
+  setTimeout(() => speakDone(id), ok ? 15000 : 1400);
+  toast('Speaking: ' + text, 'vol');
+}
+
+/* ---------- Items + events ---------- */
+function logEvent(kind, say, src, extra){
+  const ev = S.events[S.profile];
+  ev.push(Object.assign({n:ev.length + 1, t:now(), kind, en:say.en, bm:say.bm, src, seen:false}, extra || {}));
+}
+function addItem(item, src, opts){
+  item.uid = S.uid++; item.src = src; S.fresh = item.uid;
+  S.items.push(item); S.aiChoice = null;
+  if(!(opts && opts.silent)){ speak(L(item.say)); logEvent(item.kind, item.say, src, item.meta); }
+  renderMsg(); renderAI(); renderSuggest();
+}
+function addCard(key, src){
+  const c = C[key];
+  if(c.action === 'pain') return openPain();
+  if(c.action === 'sym') return openSym();
+  addItem({key, kind:c.kind, cat:catOf(key), say:c.say, short:c.short}, src || 'Card');
+}
+function flash(el, cls){ el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); setTimeout(() => el.classList.remove(cls), 1000); }
+
+/* ---------- Render: top/foot ---------- */
+function renderChrome(){
+  const P = PROFILES[S.profile];
+  $('#pFD').setAttribute('aria-pressed', S.profile === 'fd');
+  $('#pBS').setAttribute('aria-pressed', S.profile === 'bs');
+  $('#lEN').setAttribute('aria-pressed', S.lang === 'en');
+  $('#lBM').setAttribute('aria-pressed', S.lang === 'bm');
+  $('#ctx').innerHTML = icon('pin') + P.ctx;
+  $('#loc').innerHTML = `<b>${P.loc[0]}</b><span>${P.loc[1]}</span>`;
+  $('#staffBtnLbl').textContent = P.staffBtn;
+  $('#nightBtn').hidden = S.profile !== 'bs';
+  $('#speakSub').textContent = S.lang === 'en' ? 'Sebut mesej' : 'Speak message';
+}
+
+/* ---------- Render: message ---------- */
+function combined(lang){ return S.items.map(i => i.say[lang]).join(' '); }
+function renderMsg(){
+  const chips = $('#chips');
+  const say = $('#say');
+  say.classList.toggle('empty', !S.items.length);
+  say.classList.toggle('long', (S.aiChoice ? S.aiChoice[S.lang] : combined(S.lang)).length > 90);
+  if(!S.items.length){
+    chips.innerHTML = `<span class="hint">${icon('tap')}Tap a card, a quick reply, or the body map. Each choice is spoken straight away and added here.</span>`;
+    say.innerHTML = `<div class="say-main">${S.lang === 'en' ? 'Your message will appear here' : 'Mesej anda akan dipaparkan di sini'}</div><div class="say-sub">${S.lang === 'en' ? 'Mesej anda akan dipaparkan di sini' : 'Your message will appear here'}</div>`;
+    return;
+  }
+  chips.innerHTML = S.items.map(i => `<span class="chip ${i.uid === S.fresh ? 'pop' : ''}" data-cat="${i.cat || kindCat(i.kind)}">${esc(L(i.short))} <span class="src">· ${esc(i.src)}</span><button aria-label="Remove ${esc(L(i.short))}" data-rm="${i.uid}">${icon('x')}</button></span>`).join('');
+  S.fresh = null;
+  if(S.aiChoice){
+    say.innerHTML = `<div class="tag">${icon('spark')}AI wording, chosen by patient</div><div class="say-main">${esc(S.aiChoice[S.lang])}</div><div class="say-sub">${esc(S.aiChoice[other()])}</div>`;
+  } else {
+    say.innerHTML = `<div class="say-main">${esc(combined(S.lang))}</div><div class="say-sub">${esc(combined(other()))}</div>`;
+  }
+}
+
+/* ---------- Render: AI strip (simulated) ---------- */
+const PRI = {pain:0, symptom:1, answer:2, need:3, request:3, question:4, feeling:5};
+const lc = s => /^I[ ']/.test(s) ? s : s.charAt(0).toLowerCase() + s.slice(1);
+const strip = s => s.replace(/[.?!]+$/, '');
+function joinClauses(list, lang){
+  const parts = list.map(i => strip(i.say[lang]).split(/(?<=[.?!])\s+/).map(strip).join(lang === 'en' ? ', and ' : ', dan '));
+  return parts.map((p, idx) => idx === 0 ? p : lc(p)).join(lang === 'en' ? ', and ' : ', dan ') + '.';
+}
+function candidates(){
+  const content = S.items.filter(i => i.kind !== 'reply');
+  if(content.length < 2) return null;
+  const sorted = [...content].sort((a, b) => (PRI[a.kind] ?? 9) - (PRI[b.kind] ?? 9));
+  const c1 = {en:joinClauses(content,'en'), bm:joinClauses(content,'bm')};
+  const c2 = {en:sorted.map(i => i.say.en).join(' '), bm:sorted.map(i => i.say.bm).join(' ')};
+  const c3 = {en:'For staff: ' + sorted.map(i => i.short.en).join(' · '), bm:'Untuk staf: ' + sorted.map(i => i.short.bm).join(' · ')};
+  const uses = sorted.map(i => L(i.short)).join(' · ');
+  const hasTime = content.some(i => /since|for a few days|just now/i.test(i.say.en));
+  const painish = sorted.find(i => i.kind === 'pain' || i.kind === 'symptom');
+  const blocked = (!hasTime && painish) ? {text:strip(painish.say.en) + ' since yesterday.', why:'adds a time ("since yesterday") you did not choose'} : null;
+  return {list:[c1, c2, c3], uses, blocked};
+}
+let showBlocked = false;
+function renderAI(){
+  const el = $('#aistrip'); const cs = candidates();
+  if(!cs){ el.hidden = true; return; }
+  el.hidden = false;
+  el.innerHTML = `<span class="badge">3</span><div class="lbl"><span class="spark">${icon('spark')}</span><div>Say it as a sentence?<small>AI suggestions · tap one to use</small></div></div>` +
+    cs.list.map((c, i) => `<button class="cand" data-cand="${i}" title="${esc(c[S.lang])}"><span class="txt">${esc(c[S.lang])}</span><span class="uses">${icon('shield')}<span>Only your choices: ${esc(cs.uses)}</span></span></button>`).join('') +
+    (cs.blocked ? `<button class="blocked" id="blkBtn">${showBlocked ? 'Hide' : 'Show'} 1 suggestion hidden by the fact guard</button>` + (showBlocked ? `<div class="blockedbox"><s>${esc(cs.blocked.text)}</s> · hidden because it ${esc(cs.blocked.why)}.</div>` : '') : '');
+  el._cands = cs.list;
+}
+
+/* ---------- Render: rail ---------- */
+function renderRail(){
+  $('#rail').innerHTML = `<span class="badge">4</span><h3>Quick replies</h3>` + QUICK.map(q => `<button class="qr ${q.cls || ''}" data-q="${q.k}"><span class="qi">${icon(q.icon)}</span><span>${esc(L(q.label))}<small>${esc(O(q.label))}</small></span></button>`).join('');
+}
+
+/* ---------- Render: tabs / suggest / content ---------- */
+function renderTabs(){
+  const P = PROFILES[S.profile];
+  $('#tabs').innerHTML = `<span class="badge">7</span>` + P.tabs.map(([k, t, ic]) => `<button class="tab" role="tab" aria-selected="${S.tab === k}" data-tab="${k}" data-cat="${TAB_CAT[k] || 'base'}"><span class="ti">${icon(ic)}</span>${esc(L(t))} <small>${esc(O(t))}</small></button>`).join('');
+}
+const NEXT = {pain:['medicine','nurse','doctor'], water:['toilet','thanks'], register:['appointment','directions'], appointment:['directions','pharmacy'], toilet:['nurse','thanks'], reposition:['cold','rest'], scared:['nurse','qfamily'], medicine:['water','thanks'], symptoms:['doctor','medicine']};
+function suggestions(){
+  const h = new Date().getHours();
+  let base = S.profile === 'fd' ? ['register','appointment','pharmacy','toilet'] :
+             (h >= 21 || h < 6) ? ['toilet','water','cold','lights'] : ['water','toilet','reposition','pain'];
+  const last = S.items.length ? (S.items[S.items.length - 1].key || (S.items[S.items.length - 1].kind === 'pain' ? 'pain' : null)) : null;
+  const after = last && NEXT[last] ? NEXT[last] : [];
+  const used = new Set(S.items.map(i => i.key));
+  const out = [...new Set([...after, ...base])].filter(k => C[k] && !used.has(k)).slice(0, 4);
+  const why = after.length ? `After "${L(C[last].label)}"` : (S.profile === 'bs' && (h >= 21 || h < 6) ? 'Night-time requests' : 'Common at this time');
+  return {out, why};
+}
+function renderSuggest(){
+  const {out, why} = suggestions();
+  $('#suggest').innerHTML = `<span class="badge">6</span><div class="why"><b>${icon('spark')}Suggested</b>${esc(why)}</div>` +
+    out.map(k => `<button class="mini" data-card="${k}" data-src="Suggested row" data-cat="${catOf(k)}"><span class="ic">${icon(C[k].icon)}</span>${esc(L(C[k].label))}</button>`).join('');
+}
+function cardHTML(k){
+  const c = C[k];
+  const cls = k === 'opener' ? 'opener' : (c.action ? 'action' : '');
+  const go = c.action ? `<span class="go">${c.action === 'pain' ? 'Opens body map' : 'Guided steps'}${icon('arrow')}</span>` : `<span class="tick">${icon('check')}</span>`;
+  return `<button class="card ${cls}" data-card="${k}" data-cat="${catOf(k)}">${go}<span class="ic">${icon(c.icon)}</span><span><b>${esc(L(c.label))}</b><small>${esc(O(c.label))}</small></span></button>`;
+}
+function renderContent(){
+  const P = PROFILES[S.profile]; const el = $('#content');
+  const badge = `<span class="badge">8</span>`;
+  if(S.tab === 'type'){
+    el.innerHTML = badge + `<div class="typepanel"><label for="typed"><b>Type your message</b> <span class="note">Spoken word for word. Marked as typed in the staff record.</span></label>
+      <textarea id="typed" placeholder="${S.lang === 'en' ? 'Type here…' : 'Taip di sini…'}"></textarea>
+      <div class="row" id="wordSug"></div>
+      <div class="row"><button class="btn" id="typeSpeak">${icon('vol')}Speak now</button><button class="btn alt" id="typeAdd">${icon('plus')}Add to message</button></div></div>`;
+    renderWordSug(); return;
+  }
+  if(S.tab === 'draw'){
+    el.innerHTML = badge + `<div class="drawpanel"><div class="row"><b>Draw or write</b><span class="note">Shown to staff as a picture. No handwriting recognition.</span></div><canvas id="pad"></canvas>
+      <div class="row"><button class="btn" id="showBig">${icon('users')}Show large to staff</button><button class="btn alt" id="clearPad">${icon('trash')}Clear</button></div></div>`;
+    initPad(); return;
+  }
+  const keys = P[S.tab] || P.main;
+  el.innerHTML = badge + `<div class="grid">${keys.map(cardHTML).join('')}</div>`;
+}
+const DICT = ['water','toilet','pain','please','nurse','doctor','medicine','stomach','headache','help','thank you','tired','cold','blanket','home','family','appointment','register','pharmacy','hurts','since','yesterday','morning','night','saya','sakit','tolong','air','tandas','ubat','doktor','jururawat','perut','kepala','terima kasih','sejuk','selimut','keluarga','balik'];
+function renderWordSug(){
+  const ta = $('#typed'); if(!ta) return;
+  const w = (ta.value.split(/\s+/).pop() || '').toLowerCase();
+  const list = (w ? DICT.filter(d => d.startsWith(w) && d !== w) : ['I need','Please','My','It hurts','Saya perlukan','Tolong']).slice(0, 6);
+  $('#wordSug').innerHTML = list.map(d => `<button class="wordchip" data-word="${esc(d)}">${esc(d)}</button>`).join('') + `<span class="note">Word suggestions</span>`;
+}
+let padCtx = null;
+function initPad(){
+  const c = $('#pad'); const r = c.getBoundingClientRect(); const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  c.width = r.width * dpr; c.height = r.height * dpr; padCtx = c.getContext('2d'); padCtx.scale(dpr, dpr);
+  padCtx.lineWidth = 4; padCtx.lineCap = 'round'; padCtx.strokeStyle = '#10201D';
+  let drawing = false;
+  c.addEventListener('pointerdown', e => { drawing = true; c.setPointerCapture(e.pointerId); padCtx.beginPath(); padCtx.moveTo(e.offsetX, e.offsetY); });
+  c.addEventListener('pointermove', e => { if(!drawing) return; padCtx.lineTo(e.offsetX, e.offsetY); padCtx.stroke(); });
+  c.addEventListener('pointerup', () => drawing = false);
+}
+
+/* ---------- Staff question (simulated speech-to-answers) ---------- */
+function staffAsk(){
+  const btn = $('#staffMic');
+  $('#micLbl').innerHTML = `Listening <span class="listening"><i></i><i></i><i></i></span>`;
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.disabled = false; $('#micLbl').textContent = 'Staff: ask by voice';
+    const list = STAFF_Q[S.profile]; const q = list[S.staffQIdx[S.profile] % list.length]; S.staffQIdx[S.profile]++;
+    S.activeQ = q; renderStaffAsk();
+  }, 1100);
+}
+function renderStaffAsk(){
+  const el = $('#staffask'); const q = S.activeQ;
+  if(!q){ el.hidden = true; return; }
+  el.hidden = false;
+  el.innerHTML = `<div class="meta">${icon('mic')}Staff asked · transcribed · answers from the board vocabulary (simulated AI)</div>
+    <div class="q"><b>${esc(L(q.q))}</b><span>${esc(O(q.q))}</span><button class="dismiss" id="dismissQ">${icon('x')}Dismiss</button></div>
+    <div class="answers">${q.a.map((a, i) => `<button class="ans" data-ans="${i}">${esc(S.lang === 'en' ? a[0] : a[1])}<small>${esc(S.lang === 'en' ? a[1] : a[0])}</small></button>`).join('')}</div>`;
+}
+function answer(i){
+  const q = S.activeQ; const a = q.a[i];
+  addItem({kind:'answer', say:{en:a[0] + '.', bm:a[1] + '.'}, short:{en:a[0], bm:a[1]}}, 'Staff question', {silent:true});
+  speak(S.lang === 'en' ? a[0] + '.' : a[1] + '.');
+  logEvent('answer', {en:`Staff asked "${q.q.en}" → ${a[0]}.`, bm:`Staf tanya "${q.q.bm}" → ${a[1]}.`}, 'Staff question');
+  S.activeQ = null; renderStaffAsk();
+}
+
+/* ---------- Pain modal ---------- */
+function partLabel(part, side, lang){
+  const p = PART[part].l[lang];
+  if(!side) return p;
+  return lang === 'en' ? (side === 'l' ? 'left ' : 'right ') + p.toLowerCase() : p.toLowerCase() + (side === 'l' ? ' kiri' : ' kanan');
+}
+function painSay(site){
+  const ty = site.type ? TYPES.find(t => t[0] === site.type)[1] : null;
+  const en = `I have ${ty ? ty.en.toLowerCase() + ' ' : ''}pain in my ${partLabel(site.part, site.side, 'en').toLowerCase()}, rated ${site.score} out of 10.`;
+  const bm = `Saya mengalami sakit${ty ? ' ' + ty.bm.toLowerCase() : ''} pada ${partLabel(site.part, site.side, 'bm').toLowerCase()}, tahap ${site.score} daripada 10.`;
+  return {en, bm};
+}
+function painShort(site){
+  const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+  return {en:`${cap(partLabel(site.part, site.side, 'en'))} pain ${site.score}/10`, bm:`Sakit ${partLabel(site.part, site.side, 'bm').toLowerCase()} ${site.score}/10`};
+}
+function openPain(){
+  S.pain = {part:null, side:null, score:null, type:null, sites:[]};
+  $('#painModal').hidden = false;
+  renderPainForm();
+  Body.open();
+}
+function closeModal(id){ $('#' + id).hidden = true; if(id === 'painModal') Body.close(); }
+function renderPainForm(){
+  const P = S.pain;
+  const recorded = new Set(P.sites.map(s => s.part));
+  $('#parts').innerHTML = PARTS.map(p => `<button class="pb ${recorded.has(p.k) ? 'has' : ''}" data-part="${p.k}" aria-pressed="${P.part === p.k}">${esc(L(p.l))}<small>${esc(O(p.l))}</small></button>`).join('');
+  const limb = P.part && PART[P.part].limb;
+  $('#sideL').disabled = !limb; $('#sideR').disabled = !limb;
+  $('#sideL').setAttribute('aria-pressed', limb && P.side === 'l'); $('#sideR').setAttribute('aria-pressed', limb && P.side === 'r');
+  $('#sides').classList.toggle('need', !!(limb && !P.side));
+  $('#scores').innerHTML = Array.from({length:11}, (_, n) => `<button class="sc" data-score="${n}" aria-pressed="${P.score === n}" aria-label="Score ${n}">${n}</button>`).join('');
+  $('#types').innerHTML = TYPES.map(([k, t]) => `<button class="ty" data-type="${k}" aria-pressed="${P.type === k}">${esc(L(t))} <small>${esc(O(t))}</small></button>`).join('');
+  const step = sel => $(sel).closest('.step');
+  step('#parts').classList.toggle('done', !!(P.part && (!limb || P.side)));
+  step('#scores').classList.toggle('done', P.score !== null);
+  step('#types').classList.toggle('done', !!P.type);
+  $('#sites').innerHTML = P.sites.length ? `<b>Spots added</b>` + P.sites.map((s, i) => `<div class="site">${esc(L(painShort(s)))}${s.type ? ' · ' + esc(L(TYPES.find(t => t[0] === s.type)[1])) : ''}<button data-rmsite="${i}">Remove</button></div>`).join('') : '';
+  const cur = currentSite();
+  let prev;
+  if(cur.ok){ const s = painSay(cur.site); prev = `${esc(s[S.lang])}<small>${esc(s[other()])}</small>`; }
+  else prev = `<span class="todo">${icon('arrow')}${esc(cur.missing)}</span>`;
+  $('#painPrev').innerHTML = prev;
+  $('#addSite').disabled = !cur.ok;
+  Body.paint();
+}
+function currentSite(){
+  const P = S.pain;
+  if(!P.part) return {ok:false, missing: P.sites.length ? 'Add another spot, or confirm and save.' : 'Choose where it hurts.'};
+  if(PART[P.part].limb && !P.side) return {ok:false, missing:'Choose left or right.'};
+  if(P.score === null) return {ok:false, missing:'Choose a number from 0 to 10.'};
+  return {ok:true, site:{part:P.part, side:P.side, score:P.score, type:P.type}};
+}
+function commitSite(){
+  const cur = currentSite(); if(!cur.ok) return false;
+  S.pain.sites.push(cur.site); S.pain.part = null; S.pain.side = null; S.pain.score = null; S.pain.type = null;
+  return true;
+}
+function selectPart(part, side, fromBody){
+  S.pain.part = part; S.pain.side = PART[part].limb ? (side || null) : null;
+  if(!fromBody) Body.focus(part, S.pain.side);
+  renderPainForm();
+}
+function savePain(){
+  const cur = currentSite();
+  if(cur.ok) commitSite();
+  else if(!S.pain.sites.length){ $('#painPrev').innerHTML = `<span class="err">${icon('alert')}${esc(cur.missing)} Nothing has been saved yet.</span>`; return; }
+  else if(S.pain.part){ $('#painPrev').innerHTML = `<span class="err">${icon('alert')}${esc(cur.missing)} Or tap Remove to discard it.</span>`; return; }
+  S.pain.sites.forEach(site => addItem({kind:'pain', say:painSay(site), short:painShort(site), meta:{score:site.score, site:painShort(site).en.replace(/ pain.*/, '')}}, '3D pain map'));
+  closeModal('painModal');
+  toast('Pain report added to your message.');
+}
+
+/* ---------- Symptom modal ---------- */
+function openSym(){ S.sym = {what:null, when:null, how:null}; $('#symModal').hidden = false; renderSym(); }
+function symSay(){
+  const w = SYM_WHAT.find(x => x[0] === S.sym.what), t = SYM_WHEN.find(x => x[0] === S.sym.when), h = S.sym.how ? SYM_HOW.find(x => x[0] === S.sym.how) : null;
+  return {en:`I have had ${w[1]} ${t[1]}.${h ? ' ' + h[1] : ''}`, bm:`Saya mengalami ${w[2]} ${t[2]}.${h ? ' ' + h[2] : ''}`};
+}
+function renderSym(){
+  const mk = (arr, key, lab) => arr.map(x => `<button class="opt" data-sym="${key}" data-v="${x[0]}" aria-pressed="${S.sym[key] === x[0]}">${esc(L(lab(x)))}<small>${esc(O(lab(x)))}</small></button>`).join('');
+  $('#symWhat').innerHTML = mk(SYM_WHAT, 'what', x => SYM_LABEL[x[0]]);
+  $('#symWhen').innerHTML = mk(SYM_WHEN, 'when', x => x[3]);
+  $('#symHow').innerHTML = mk(SYM_HOW, 'how', x => x[3]);
+  $('#symWhat').closest('.step').classList.toggle('done', !!S.sym.what);
+  $('#symWhen').closest('.step').classList.toggle('done', !!S.sym.when);
+  $('#symHow').closest('.step').classList.toggle('done', !!S.sym.how);
+  if(S.sym.what && S.sym.when){ const s = symSay(); $('#symPrev').innerHTML = `${esc(s[S.lang])}<small>${esc(s[other()])}</small>`; }
+  else $('#symPrev').innerHTML = `<span class="todo">${icon('arrow')}${!S.sym.what ? 'Choose what it is.' : 'Choose since when.'}</span>`;
+}
+function saveSym(){
+  if(!(S.sym.what && S.sym.when)) return renderSym();
+  const s = symSay(); const lab = SYM_LABEL[S.sym.what]; const wh = SYM_WHEN.find(x => x[0] === S.sym.when)[3];
+  addItem({kind:'symptom', say:s, short:{en:`${lab.en}, ${wh.en.toLowerCase()}`, bm:`${lab.bm}, ${wh.bm.toLowerCase()}`}}, 'Guided steps');
+  closeModal('symModal');
+  toast('Symptom added to your message.');
+}
+
+/* ---------- Staff view ---------- */
+function openStaff(){
+  const P = PROFILES[S.profile];
+  $('#staffTitle').textContent = P.staffTitle;
+  $('#staffSub').textContent = (S.profile === 'fd' ? 'Counter 3 · ' : 'Wad 5B · Katil 12 · ') + 'Signed in as staff SN-104 (simulated) · no patient name stored';
+  $('#sumTitle').textContent = S.profile === 'fd' ? 'AI visit summary' : 'AI handover summary';
+  $('#trendPanel').hidden = S.profile !== 'bs';
+  renderStaff(); $('#staff').hidden = false;
+}
+function renderStaff(){
+  const ev = S.events[S.profile];
+  const rows = [...ev].reverse();
+  $('#evRows').innerHTML = rows.length ? rows.map(e => `<tr><td class="t">#${e.n}</td><td class="t">${e.t}</td><td><span class="kind" data-cat="${kindCat(e.kind)}">${esc(e.kind)}</span> ${esc(e[S.lang])}</td><td class="t">${esc(e.src)}</td><td><button class="seen ${e.seen ? 'done' : ''}" data-seen="${e.n}">${e.seen ? icon('check') + 'Seen' : 'Mark seen'}</button></td></tr>`).join('') :
+    `<tr><td colspan="5" class="note">No messages yet in this visit. Messages appear here as the patient uses the board.</td></tr>`;
+  $('#sumList').innerHTML = summary(ev).map(l => `<li>${l}</li>`).join('') || '<li class="note">Nothing to summarise yet.</li>';
+  if(S.profile === 'bs') renderTrend(ev);
+}
+function summary(ev){
+  const out = []; const refs = list => list.map(e => `<span class="ref">#${e.n}</span>`).join('');
+  const pains = ev.filter(e => e.kind === 'pain');
+  if(pains.length){
+    const last = pains[pains.length - 1];
+    out.push(`Latest pain report: ${esc(last.site || 'see message')}, patient rated ${last.score}/10 at ${last.t}.${refs([last])}`);
+    if(pains.length > 1){ const first = pains[0]; out.push(`Patient's own scores went from ${first.score}/10 (${first.t}) to ${last.score}/10 (${last.t}).${refs([first, last])}`); }
+  }
+  const needs = ev.filter(e => e.kind === 'need' || e.kind === 'request');
+  if(needs.length) out.push(`Requests: ${needs.map(e => esc(e.en.replace(/\.$/, ''))).join('; ')}.${refs(needs)}`);
+  const ans = ev.filter(e => e.kind === 'answer');
+  if(ans.length) out.push(`Answers to staff: ${ans.map(e => esc(e.en)).join(' ')}${refs(ans)}`);
+  const feel = ev.filter(e => e.kind === 'feeling' || e.kind === 'question' || e.kind === 'symptom');
+  if(feel.length) out.push(`Also said: ${feel.map(e => esc(e.en)).join(' ')}${refs(feel)}`);
+  const alerts = ev.filter(e => e.kind === 'alert');
+  if(alerts.length) out.push(`Emergency button used: ${alerts.map(e => esc(e.en)).join(' ')}${refs(alerts)}`);
+  const unseen = ev.filter(e => !e.seen);
+  if(unseen.length) out.push(`<b>Not yet marked seen:</b> ${unseen.length} item${unseen.length > 1 ? 's' : ''}.${refs(unseen)}`);
+  return out;
+}
+function renderTrend(ev){
+  const pts = ev.filter(e => e.kind === 'pain');
+  if(pts.length < 2){ $('#trend').innerHTML = '<p class="note">Two or more pain reports needed for a trend.</p>'; return; }
+  const W = 460, H = 170, l = 34, r = 16, t = 14, b = 30;
+  const x = i => l + i * (W - l - r) / (pts.length - 1), y = v => t + (10 - v) * (H - t - b) / 10;
+  const grid = [0, 5, 10].map(v => `<line class="g" x1="${l}" x2="${W - r}" y1="${y(v)}" y2="${y(v)}"/><text class="gt" x="${l - 8}" y="${y(v) + 4}" text-anchor="end" font-size="11">${v}</text>`).join('');
+  const line = pts.map((p, i) => `${i ? 'L' : 'M'}${x(i)},${y(p.score)}`).join('');
+  const area = line + `L${x(pts.length - 1)},${y(0)}L${x(0)},${y(0)}Z`;
+  const dots = pts.map((p, i) => `<circle class="pt ${i === pts.length - 1 ? 'last' : ''}" cx="${x(i)}" cy="${y(p.score)}" r="${i === pts.length - 1 ? 5 : 3.5}" stroke-width="2"/><text class="gt" x="${x(i)}" y="${H - 10}" text-anchor="middle" font-size="11">${p.t}</text>`).join('');
+  const lastP = pts[pts.length - 1];
+  $('#trend').innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Patient-reported pain scores over the stay">${grid}<path class="ar" d="${area}"/><path class="ln" d="${line}" fill="none" stroke-width="2.5" stroke-linejoin="round"/>${dots}<text class="lbl" x="${x(pts.length - 1) - 8}" y="${y(lastP.score) - 10}" text-anchor="end" font-size="12" font-weight="700">${lastP.score}/10 now</text></svg>`;
+}
+
+/* ---------- Emergency ---------- */
+let audioCtx = null, beepTimer = null, alarmSrc = 'button';
+function startAlarm(){
+  try{ speechSynthesis.cancel(); }catch(e){}
+  $('#alarmWhere').textContent = S.profile === 'fd' ? 'Front desk · Counter 3' : 'Wad 5B · Katil 12';
+  $('#alarm').hidden = false;
+  logEvent('alert', {en:'Emergency button pressed.', bm:'Butang kecemasan ditekan.'}, 'Emergency button');
+  try{
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const beep = () => { const o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.frequency.value = 880; g.gain.value = .08; o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + .25); };
+    beep(); beepTimer = setInterval(beep, 700);
+  }catch(e){}
+}
+function stopAlarm(outcome){
+  clearInterval(beepTimer); $('#alarm').hidden = true;
+  logEvent('alert', outcome === 'ack' ? {en:'Alert acknowledged by staff.', bm:'Amaran diakui oleh staf.'} : {en:'Alert cancelled: pressed by mistake.', bm:'Amaran dibatalkan: tertekan.'}, outcome === 'ack' ? 'Staff' : 'Patient');
+  toast(outcome === 'ack' ? 'Alert acknowledged. Message kept.' : 'Alert cancelled. Message kept.');
+  if(!$('#staff').hidden) renderStaff();
+}
+
+/* ---------- 3D body ---------- */
+const Body = (function(){
+  let ready = false, failed = false, renderer, scene, camera, raf = null, meshes = [], hover = null;
+  const camPos = {x:0, y:1.55, z:6.4}, camTgt = {x:0, y:1.5, z:0}, want = {pos:{x:0, y:1.55, z:6.4}, tgt:{x:0, y:1.5, z:0}};
+  const VIEWS = {
+    front:{l:'Front', pos:[0,1.55,6.4], tgt:[0,1.5,0]}, back:{l:'Back', pos:[0,1.55,-6.4], tgt:[0,1.5,0]},
+    left:{l:"Patient's left", pos:[6.4,1.55,0], tgt:[0,1.5,0]}, right:{l:"Patient's right", pos:[-6.4,1.55,0], tgt:[0,1.5,0]},
+    head:{l:'Head', pos:[0,2.75,2.5], tgt:[0,2.6,0]}, torso:{l:'Torso', pos:[0,1.8,3.7], tgt:[0,1.7,0]},
+    legs:{l:'Legs', pos:[0,.95,4.9], tgt:[0,.75,0]}, reset:{l:'Reset', pos:[0,1.55,6.4], tgt:[0,1.5,0]}
+  };
+  let curView = 'front';
+  function renderViews(){
+    $('#views').innerHTML = Object.entries(VIEWS).map(([k, v]) => `<button data-view="${k}" aria-pressed="${curView === k}">${v.l}</button>`).join('');
+  }
+  function setView(k){ const v = VIEWS[k]; curView = k === 'reset' ? 'front' : k; want.pos = {x:v.pos[0], y:v.pos[1], z:v.pos[2]}; want.tgt = {x:v.tgt[0], y:v.tgt[1], z:v.tgt[2]}; renderViews(); }
+  function build(){
+    if(typeof THREE === 'undefined'){ failed = true; $('#fallback').hidden = false; $('#tip3d').hidden = true; return; }
+    const host = $('#body3d');
+    try{ renderer = new THREE.WebGLRenderer({antialias:true, alpha:true}); }catch(e){ failed = true; $('#fallback').hidden = false; $('#tip3d').hidden = true; return; }
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    host.insertBefore(renderer.domElement, host.firstChild);
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(35, 1, .1, 100);
+    scene.add(new THREE.HemisphereLight(0xffffff, 0xa9b0cc, .9));
+    const d = new THREE.DirectionalLight(0xffffff, .55); d.position.set(3, 5, 4); scene.add(d);
+    const d2 = new THREE.DirectionalLight(0xffffff, .35); d2.position.set(-3, 3, -4); scene.add(d2);
+    const add = (geo, region, pos, rot, scl) => {
+      const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({color:0xdde1ee, roughness:.75, metalness:0, side:THREE.DoubleSide}));
+      m.position.set(pos[0], pos[1], pos[2]); if(rot) m.rotation.set(rot[0], rot[1], rot[2]); if(scl) m.scale.set(scl[0], scl[1], scl[2]);
+      m.userData.region = region; scene.add(m); meshes.push(m); return m;
+    };
+    const half = (rt, rb, h, front) => new THREE.CylinderGeometry(rt, rb, h, 40, 1, false, front ? -Math.PI / 2 : Math.PI / 2, Math.PI);
+    add(new THREE.SphereGeometry(.3, 32, 24), 'head', [0, 2.8, 0], null, [1, 1.12, 1]);
+    add(new THREE.CylinderGeometry(.12, .14, .24, 24), 'neck', [0, 2.43, 0]);
+    add(half(.5, .45, .64, true), 'chest', [0, 2.0, 0], null, [1, 1, .6]);
+    add(half(.5, .45, .64, false), 'upperback', [0, 2.0, 0], null, [1, 1, .6]);
+    add(half(.45, .42, .64, true), 'stomach', [0, 1.36, 0], null, [1, 1, .6]);
+    add(half(.45, .42, .64, false), 'lowerback', [0, 1.36, 0], null, [1, 1, .6]);
+    add(new THREE.SphereGeometry(.15, 20, 16), 'arm_l', [.55, 2.24, 0]);
+    add(new THREE.SphereGeometry(.15, 20, 16), 'arm_r', [-.55, 2.24, 0]);
+    add(new THREE.CylinderGeometry(.11, .09, 1.0, 20), 'arm_l', [.67, 1.74, 0], [0, 0, .12]);
+    add(new THREE.CylinderGeometry(.11, .09, 1.0, 20), 'arm_r', [-.67, 1.74, 0], [0, 0, -.12]);
+    add(new THREE.SphereGeometry(.12, 20, 16), 'hand_l', [.74, 1.13, 0], null, [.9, 1.35, .7]);
+    add(new THREE.SphereGeometry(.12, 20, 16), 'hand_r', [-.74, 1.13, 0], null, [.9, 1.35, .7]);
+    add(new THREE.CylinderGeometry(.18, .12, 1.0, 24), 'leg_l', [.21, .55, 0]);
+    add(new THREE.CylinderGeometry(.18, .12, 1.0, 24), 'leg_r', [-.21, .55, 0]);
+    add(new THREE.BoxGeometry(.2, .1, .36), 'foot_l', [.21, .02, .08]);
+    add(new THREE.BoxGeometry(.2, .1, .36), 'foot_r', [-.21, .02, .08]);
+    const floor = new THREE.Mesh(new THREE.CircleGeometry(.9, 40), new THREE.MeshBasicMaterial({color:0x000000, transparent:true, opacity:.06}));
+    floor.rotation.x = -Math.PI / 2; floor.position.y = -.04; scene.add(floor);
+    new ResizeObserver(resize).observe(host); resize();
+    const ray = new THREE.Raycaster(), v2 = new THREE.Vector2(); let down = null;
+    const pick = e => { const r = renderer.domElement.getBoundingClientRect(); v2.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1); ray.setFromCamera(v2, camera); const hit = ray.intersectObjects(meshes)[0]; return hit ? hit.object.userData.region : null; };
+    renderer.domElement.addEventListener('pointerdown', e => down = {x:e.clientX, y:e.clientY});
+    renderer.domElement.addEventListener('pointerup', e => {
+      if(!down || Math.hypot(e.clientX - down.x, e.clientY - down.y) > 8) return; down = null;
+      const reg = pick(e); if(!reg) return;
+      const [part, side] = reg.split('_');
+      selectPart(part, side, true);
+      $('#tip3d').textContent = 'Selected: ' + L(PART[part].l) + (side ? (side === 'l' ? ' · left' : ' · right') : '');
+    });
+    renderer.domElement.addEventListener('pointermove', e => { if(e.pointerType !== 'mouse') return; const reg = pick(e); if(reg !== hover){ hover = reg; renderer.domElement.style.cursor = reg ? 'pointer' : 'default'; paint(); } });
+    ready = true;
+  }
+  function resize(){ if(!renderer) return; const host = $('#body3d'); const w = host.clientWidth, h = host.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+  const lerpC = (a, b, t) => { const ca = new THREE.Color(a), cb = new THREE.Color(b); return ca.lerp(cb, t); };
+  function paint(){
+    if(!ready) return;
+    const P = S.pain; const curRegs = new Set();
+    if(P.part){ if(PART[P.part].limb){ if(P.side) curRegs.add(P.part + '_' + P.side); else { curRegs.add(P.part + '_l'); curRegs.add(P.part + '_r'); } } else curRegs.add(P.part); }
+    const rec = {}; P.sites.forEach(s => { rec[PART[s.part].limb ? s.part + '_' + s.side : s.part] = s.score; });
+    meshes.forEach(m => {
+      const r = m.userData.region; const mat = m.material;
+      mat.emissive.setHex(0x000000);
+      if(curRegs.has(r)){ mat.color.setHex(0x3d4bd8); mat.emissive.setHex(0x0b0f3a); }
+      else if(r in rec){ mat.color.copy(lerpC(0xf5d9b0, 0xd2541f, rec[r] / 10)); }
+      else if(r === hover){ mat.color.setHex(0xb9c0f5); }
+      else mat.color.setHex(0xdde1ee);
+    });
+  }
+  function loop(){
+    const k = .14;
+    for(const a of ['x','y','z']){ camPos[a] += (want.pos[a] - camPos[a]) * k; camTgt[a] += (want.tgt[a] - camTgt[a]) * k; }
+    camera.position.set(camPos.x, camPos.y, camPos.z); camera.lookAt(camTgt.x, camTgt.y, camTgt.z);
+    renderer.render(scene, camera); raf = requestAnimationFrame(loop);
+  }
+  function focus(part, side){
+    const map = {head:'head', neck:'head', chest:'torso', stomach:'torso', upperback:'back', lowerback:'back', arm:'front', hand:'front', leg:'legs', foot:'legs'};
+    setView(map[part] || 'front');
+  }
+  return {
+    open(){ renderViews(); if(!ready && !failed) build(); setView('front'); $('#tip3d').textContent = 'Tap a body part'; if(ready){ resize(); cancelAnimationFrame(raf); loop(); } },
+    close(){ cancelAnimationFrame(raf); raf = null; },
+    paint, focus, setView
+  };
+})();
+
+/* ---------- Events ---------- */
+document.addEventListener('click', e => {
+  const t = e.target.closest('button'); if(!t) return;
+  const d = t.dataset;
+  if(d.card){ if(!C[d.card].action && t.classList.contains('card')) flash(t, 'sent'); return addCard(d.card, d.src); }
+  if(d.q){ flash(t, 'sent'); const q = QUICK.find(x => x.k === d.q); return addItem({kind:'reply', say:q.say, short:q.label}, 'Quick reply'); }
+  if(d.rm){ S.items = S.items.filter(i => i.uid != d.rm); S.aiChoice = null; renderMsg(); renderAI(); renderSuggest(); return; }
+  if(d.cand){ const c = $('#aistrip')._cands[+d.cand]; S.aiChoice = c; renderMsg(); speak(c[S.lang]); logEvent('message', c, 'AI wording (patient chose)'); return; }
+  if(t.id === 'blkBtn'){ showBlocked = !showBlocked; return renderAI(); }
+  if(d.tab){ S.tab = d.tab; renderTabs(); renderContent(); return; }
+  if(d.ans) return answer(+d.ans);
+  if(t.id === 'dismissQ'){ S.activeQ = null; return renderStaffAsk(); }
+  if(d.close) return closeModal(d.close);
+  if(d.part) return selectPart(d.part, null, false);
+  if(d.score !== undefined){ S.pain.score = +d.score; return renderPainForm(); }
+  if(d.type){ S.pain.type = S.pain.type === d.type ? null : d.type; return renderPainForm(); }
+  if(d.rmsite !== undefined){ S.pain.sites.splice(+d.rmsite, 1); return renderPainForm(); }
+  if(d.view){ Body.setView(d.view); return; }
+  if(d.sym){ S.sym[d.sym] = S.sym[d.sym] === d.v ? null : d.v; return renderSym(); }
+  if(d.seen){ const ev = S.events[S.profile].find(x => x.n == d.seen); ev.seen = !ev.seen; return renderStaff(); }
+  if(d.word){ const ta = $('#typed'); const parts = ta.value.split(/(\s+)/); if(ta.value && !/\s$/.test(ta.value)) parts.pop(); ta.value = parts.join('') + d.word + ' '; ta.focus(); return renderWordSug(); }
+});
+$('#sideL').onclick = () => { S.pain.side = 'l'; Body.focus(S.pain.part, 'l'); renderPainForm(); };
+$('#sideR').onclick = () => { S.pain.side = 'r'; Body.focus(S.pain.part, 'r'); renderPainForm(); };
+$('#addSite').onclick = () => { if(commitSite()) renderPainForm(); };
+$('#painSave').onclick = savePain;
+$('#symSave').onclick = saveSym;
+$('#pFD').onclick = () => switchProfile('fd');
+$('#pBS').onclick = () => switchProfile('bs');
+$('#lEN').onclick = () => { S.lang = 'en'; renderAll(); };
+$('#lBM').onclick = () => { S.lang = 'bm'; renderAll(); };
+const setOn = (el, on) => { el.setAttribute('aria-pressed', on); el.querySelector('.on').textContent = on ? 'On' : 'Off'; };
+$('#nightBtn').onclick = e => { const on = !document.body.classList.contains('night'); document.body.classList.toggle('night', on); setOn(e.currentTarget, on); };
+$('#staffMenu').addEventListener('click', e => { if(e.target.closest('.mi')) $('#staffMenu').hidePopover(); });
+$('#speakAll').onclick = () => {
+  if(!S.items.length) return toast('Nothing to speak yet. Tap a card first.', 'tap');
+  const text = S.aiChoice ? S.aiChoice[S.lang] : combined(S.lang);
+  speak(text); logEvent('message', S.aiChoice || {en:combined('en'), bm:combined('bm')}, 'Speak message');
+};
+$('#replay').onclick = () => S.lastSpoken ? speak(S.lastSpoken) : toast('Nothing spoken yet.', 'info');
+$('#stop').onclick = () => { speakId++; document.body.classList.remove('speaking'); try{ speechSynthesis.cancel(); }catch(e){} toast('Speech stopped.', 'stop'); };
+$('#undo').onclick = () => { if(!S.items.length) return; S.items = []; S.aiChoice = null; renderMsg(); renderAI(); renderSuggest(); toast('Message cleared.', 'trash'); };
+$('#staffMic').onclick = staffAsk;
+$('#staffBtn').onclick = openStaff;
+$('#staffClose').onclick = () => $('#staff').hidden = true;
+$('#copySum').onclick = () => {
+  const text = [...$('#sumList').querySelectorAll('li')].map(li => '- ' + li.textContent).join('\n');
+  try{ navigator.clipboard.writeText(text).then(() => toast('Summary copied.', 'copy'), () => toast('Copy was blocked by the browser.')); }catch(e){ toast('Copy was blocked by the browser.'); }
+};
+$('#sos').onclick = startAlarm;
+$('#ack').onclick = () => stopAlarm('ack');
+$('#cancelAlarm').onclick = () => stopAlarm('cancel');
+$('#notesBtn').onclick = () => { const on = !document.body.classList.contains('notes'); document.body.classList.toggle('notes', on); setOn($('#notesBtn'), on); $('#drawer').hidden = !on; };
+$('#drawerClose').onclick = () => { document.body.classList.remove('notes'); setOn($('#notesBtn'), false); $('#drawer').hidden = true; };
+$('#bigClose').onclick = () => $('#big').hidden = true;
+document.addEventListener('input', e => { if(e.target.id === 'typed') renderWordSug(); });
+document.addEventListener('click', e => {
+  const t = e.target.closest('button'); if(!t) return;
+  if(t.id === 'typeSpeak' || t.id === 'typeAdd'){
+    const v = ($('#typed').value || '').trim(); if(!v) return toast('Type something first.', 'kbd');
+    if(t.id === 'typeSpeak'){ speak(v); logEvent('message', {en:v, bm:v}, 'Typed'); }
+    else { addItem({kind:'typed', say:{en:v, bm:v}, short:{en:'Typed: ' + v.slice(0, 18) + (v.length > 18 ? '…' : ''), bm:'Ditaip: ' + v.slice(0, 18) + (v.length > 18 ? '…' : '')}}, 'Typed'); $('#typed').value = ''; renderWordSug(); }
+  }
+  if(t.id === 'clearPad' && padCtx){ const c = $('#pad'); padCtx.clearRect(0, 0, c.width, c.height); }
+  if(t.id === 'showBig'){ $('#bigImg').src = $('#pad').toDataURL(); $('#big').hidden = false; logEvent('message', {en:'Patient showed a drawing.', bm:'Pesakit menunjukkan lukisan.'}, 'Draw'); }
+});
+document.addEventListener('keydown', e => {
+  if(e.key !== 'Escape') return;
+  if(!$('#painModal').hidden) closeModal('painModal');
+  else if(!$('#symModal').hidden) closeModal('symModal');
+  else if(!$('#staff').hidden) $('#staff').hidden = true;
+});
+
+function switchProfile(p){
+  if(S.profile === p) return;
+  S.profile = p; S.tab = 'main'; S.items = []; S.aiChoice = null; S.activeQ = null;
+  if(p === 'fd') document.body.classList.remove('night');
+  setOn($('#nightBtn'), document.body.classList.contains('night'));
+  renderAll();
+  toast(p === 'fd' ? 'Front desk profile: new visit started.' : 'Bedside profile: Wad 5B, Katil 12.');
+}
+function renderAll(){ renderChrome(); renderMsg(); renderAI(); renderRail(); renderTabs(); renderSuggest(); renderContent(); renderStaffAsk(); if(!$('#staff').hidden) openStaff(); if(!$('#painModal').hidden) renderPainForm(); if(!$('#symModal').hidden) renderSym(); }
+
+// Start in a realistic working state: a front-desk visit with two items already chosen.
+renderAll();
+addItem({key:'register', kind:'request', say:C.register.say, short:C.register.short}, 'Card', {silent:true});
+logEvent('request', C.register.say, 'Card');
+const demoSite = {part:'leg', side:'l', score:6, type:'sharp'};
+addItem({kind:'pain', say:painSay(demoSite), short:painShort(demoSite), meta:{score:6, site:'Left leg'}}, '3D pain map', {silent:true});
+logEvent('pain', painSay(demoSite), '3D pain map', {score:6, site:'Left leg'});
+})();
+</script>
+</body>
+</html>

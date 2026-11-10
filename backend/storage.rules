@@ -1,0 +1,11 @@
+rules_version = '2';
+
+// Plan 00: Storage is never reachable by clients. Drawings are served through short-lived
+// signed URLs from NestJS (Task B.9), which bypass these rules. Keep this deny-all.
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
